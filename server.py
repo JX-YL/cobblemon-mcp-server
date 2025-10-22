@@ -103,9 +103,12 @@ async def create_pokemon_with_stats(
     defence: int = 100,
     special_attack: int = 100,
     special_defence: int = 100,
-    speed: int = 100
+    speed: int = 100,
+    moves: list = None,
+    evolution_level: int = None,
+    evolution_target: str = None
 ) -> dict:
-    """创建宝可梦配置（支持自定义能力值）
+    """创建宝可梦配置（支持自定义能力值、招式和进化）
     
     Args:
         name: 宝可梦名称
@@ -117,9 +120,22 @@ async def create_pokemon_with_stats(
         special_attack: 特攻能力值（默认 100）
         special_defence: 特防能力值（默认 100）
         speed: 速度能力值（默认 100）
+        moves: 招式列表，格式如 ["1:tackle", "5:ember", "tm:flamethrower"]
+        evolution_level: 进化等级（如果有进化）
+        evolution_target: 进化目标宝可梦名称
     
     Returns:
         宝可梦配置
+    
+    Examples:
+        # 基础配置
+        create_pokemon_with_stats("Testmon", 1001, "fire")
+        
+        # 带招式
+        create_pokemon_with_stats("Testmon", 1001, "fire", moves=["1:tackle", "5:ember"])
+        
+        # 带进化
+        create_pokemon_with_stats("Testmon", 1001, "fire", evolution_level=16, evolution_target="Testmon2")
     """
     # 验证名称
     is_valid, error = name_validator.validate_species_name(name)
@@ -165,6 +181,29 @@ async def create_pokemon_with_stats(
             }
         }
     }
+    
+    # 添加招式
+    if moves:
+        species["moves"] = moves
+    
+    # 添加进化信息
+    if evolution_level and evolution_target:
+        species["evolutions"] = [
+            {
+                "id": f"{name.lower()}_{evolution_target.lower()}",
+                "variant": "level_up",
+                "result": evolution_target.lower(),
+                "consumeHeldItem": False,
+                "learnableMoves": [],
+                "requirements": [
+                    {
+                        "variant": "level",
+                        "minLevel": evolution_level
+                    }
+                ],
+                "requiredContext": None
+            }
+        ]
     
     # 验证格式
     is_valid, errors = format_validator.validate_species(species)
@@ -261,24 +300,43 @@ async def create_complete_package(
     defence: int = 100,
     special_attack: int = 100,
     special_defence: int = 100,
-    speed: int = 100
+    speed: int = 100,
+    moves: list = None,
+    evolution_level: int = None,
+    evolution_target: str = None
 ) -> dict:
-    """一键生成完整资源包
+    """一键生成完整资源包（支持招式和进化）
     
     Args:
         name: 宝可梦名称
         dex: 图鉴号
         primary_type: 主属性
         hp-speed: 能力值
+        moves: 招式列表，如 ["1:tackle", "5:ember", "tm:flamethrower"]
+        evolution_level: 进化等级
+        evolution_target: 进化目标宝可梦
     
     Returns:
         完整资源包信息
+    
+    Examples:
+        # 基础包
+        create_complete_package("Firemon", 2001, "fire")
+        
+        # 带招式和进化
+        create_complete_package(
+            "Firemon", 2001, "fire",
+            moves=["1:tackle", "5:ember", "10:flamewheel"],
+            evolution_level=16,
+            evolution_target="Blazemon"
+        )
     """
     # 1. 创建配置
     result = await create_pokemon_with_stats(
         name, dex, primary_type,
         hp, attack, defence,
-        special_attack, special_defence, speed
+        special_attack, special_defence, speed,
+        moves, evolution_level, evolution_target
     )
     
     if not result.get("success"):
