@@ -1,249 +1,303 @@
-# Release v1.3.0: 进化系统完整版
+# 🎉 Cobblemon MCP Server v1.3.0
 
-## 🎉 主要更新
+## Multiple Evolution Types & Conditions
 
-### ✨ 新增功能
+这是一个重要的功能扩展更新，新增了**多种进化类型和进化条件支持**，让您可以创建更复杂的宝可梦进化机制。
 
-#### 1. 多种进化类型支持
+---
 
-- **等级进化 (level_up)** 
-  - 达到指定等级自动进化
-  - 示例：Leafling 16级进化为 Floratree
+## ✨ 新特性
 
-- **道具进化 (item_interact)**
-  - 使用进化石等道具进化
-  - 支持 11 种进化石：
-    - Thunder Stone (雷之石)
-    - Fire Stone (火之石)
-    - Water Stone (水之石)
-    - Leaf Stone (叶之石)
-    - Ice Stone (冰之石)
-    - Moon Stone (月之石)
-    - Sun Stone (日之石)
-    - Shiny Stone (光之石)
-    - Dusk Stone (暗之石)
-    - Dawn Stone (觉醒石)
-    - Linking Cord (连接之绳)
+### 🧬 多进化类型支持
 
-- **交换进化 (trade)**
-  - 通过玩家间交换进化
-  - 示例：Ironpup 交换进化为 Steeltitan
+现在支持 3 种进化类型：
 
-#### 2. 复合进化条件
+| 进化类型 | 说明 | 示例 |
+|----------|------|------|
+| `level_up` | 等级进化 | 小火龙 16级 → 火恐龙 |
+| `item_interact` | 道具进化 | 伊布 + 火之石 → 火伊布 |
+| `trade` | 交换进化 | 豪力 交换 → 怪力 |
 
-支持多种条件组合，实现更复杂的进化机制：
+### 🎯 复合进化条件支持
 
-- **等级条件** (level)
-  ```python
-  evolution_level=16
-  ```
+支持 5 种进化条件，可组合使用：
 
-- **亲密度条件** (friendship)
-  ```python
-  evolution_friendship=160
-  ```
+| 条件类型 | 说明 | 参数范围 | 示例 |
+|----------|------|---------|------|
+| `level` | 等级要求 | 1-100 | 16级进化 |
+| `friendship` | 亲密度要求 | 0-255 | 亲密度 ≥220 |
+| `time_range` | 时间要求 | day/night/dusk/dawn | 白天进化 |
+| `has_move_type` | 招式类型要求 | 任意属性 | 掌握妖精系招式 |
+| `biome` | 生物群系要求 | 群系标签 | 森林生物群系 |
 
-- **时间条件** (time_range)
-  ```python
-  evolution_time_range="day"    # 白天
-  evolution_time_range="night"  # 夜晚
-  evolution_time_range="dusk"   # 黄昏
-  evolution_time_range="dawn"   # 黎明
-  ```
+### 🔧 增强的 EvolutionValidator
 
-- **招式类型条件** (has_move_type)
-  ```python
-  evolution_move_type="fairy"
-  ```
+- ✅ 验证所有进化类型和条件
+- ✅ 检查 `requiredContext` 字段正确性
+- ✅ 验证 `friendship` 值范围（0-255）
+- ✅ 验证 `time_range` 值（day/night/dusk/dawn）
+- ✅ 防止不支持的进化变体和条件
 
-- **生物群系条件** (biome)
-  ```python
-  evolution_biome="cobblemon:is_snowy"
-  ```
+---
 
-#### 3. 复合条件示例
+## 🐛 关键修复
 
-```python
-# 类似太阳伊布：亲密度 + 白天
-create_pokemon_with_stats(
-    name="Suneevee",
-    dex=10011,
-    primary_type="psychic",
-    evolution_variant="level_up",
-    evolution_target="Espeon",
-    evolution_friendship=160,
-    evolution_time_range="day"
-)
+### 交换进化 Bug 修复
 
-# 类似仙子伊布：亲密度 + 妖精招式
-create_pokemon_with_stats(
-    name="Faireevee",
-    dex=10012,
-    primary_type="fairy",
-    evolution_variant="level_up",
-    evolution_target="Sylveon",
-    evolution_friendship=160,
-    evolution_move_type="fairy"
-)
-```
+**问题**: 交换进化不生效，JSON 包含了错误的 `requiredContext: null` 字段
 
-### 🐛 Bug 修复
+**修复**: 
+- `level_up` 和 `trade` 进化类型不再添加 `requiredContext` 字段
+- 仅 `item_interact` 类型需要 `requiredContext` 指定进化道具
 
-#### 1. 修复交换进化不生效问题
-
-**问题描述：**
-- trade 类型进化因错误添加了 `requiredContext: null` 字段导致游戏无法正常进化
-
-**解决方案：**
-- 仅为 `item_interact` 类型添加 `requiredContext` 字段
-- `level_up` 和 `trade` 类型不再包含此字段
-
-**修复前：**
 ```json
+// ✅ 正确的交换进化配置
 {
   "variant": "trade",
-  "requiredContext": null  // ❌ 导致进化失败
+  "result": "Machamp",
+  "requirements": []
+  // 没有 requiredContext 字段
 }
-```
 
-**修复后：**
-```json
+// ✅ 正确的道具进化配置
 {
-  "variant": "trade"  // ✅ 正常工作
+  "variant": "item_interact",
+  "result": "Flareon",
+  "requiredContext": "cobblemon:fire_stone"
 }
 ```
 
-#### 2. 进化验证增强
+---
 
-- ✅ 验证进化类型的有效性
-- ✅ 验证进化条件的正确性
-- ✅ 检查道具进化是否指定了有效道具
-- ✅ 防止配置不存在的进化目标
-- ✅ 防止自我进化配置
-
-### 🔧 改进
-
-1. **EvolutionValidator 扩展**
-   - 支持 3 种进化类型验证
-   - 支持 5 种进化条件验证
-   - 提供详细的错误提示和建议
-
-2. **工具参数扩展**
-   ```python
-   create_pokemon_with_stats(
-       # ... 基础参数
-       evolution_variant="item_interact",  # 新增：进化类型
-       evolution_item="cobblemon:fire_stone",  # 新增：进化道具
-       evolution_friendship=160,  # 新增：亲密度要求
-       evolution_time_range="day",  # 新增：时间要求
-       evolution_move_type="fairy"  # 新增：招式类型要求
-   )
-   ```
-
-3. **错误提示优化**
-   - 提供常用进化道具列表
-   - 显示可用的进化目标建议
-   - 详细的验证失败原因
-
-## 📦 测试包
-
-已生成 5 组测试包（共 10 个宝可梦）：
-
-1. **Leafling → Floratree** (等级进化)
-2. **Voltpup → Thunderhound** (道具进化 - 雷之石)
-3. **Ironpup → Steeltitan** (交换进化)
-4. **Twilightfox → Nightwolf** (亲密度 + 夜晚)
-5. **Fairykit → Mysticfox** (亲密度 + 妖精招式)
-
-## 🚀 使用示例
-
-### 基础等级进化
-```python
-create_complete_package(
-    "Leafling", 10007, "grass",
-    evolution_level=16,
-    evolution_target="Floratree"
-)
-```
+## 🎮 使用示例
 
 ### 道具进化
+
 ```python
-create_complete_package(
-    "Voltpup", 10008, "electric",
+# 使用火之石进化
+create_pokemon_with_stats(
+    name="Firepup",
+    dex=10001,
+    primary_type="fire",
     evolution_variant="item_interact",
-    evolution_item="cobblemon:thunder_stone",
-    evolution_target="Thunderhound"
+    evolution_item="cobblemon:fire_stone",
+    evolution_target="Flamebeast"
 )
 ```
 
 ### 交换进化
+
 ```python
-create_complete_package(
-    "Ironpup", 10009, "steel",
+# 交换进化
+create_pokemon_with_stats(
+    name="Ironpup",
+    dex=10002,
+    primary_type="steel",
     evolution_variant="trade",
     evolution_target="Steeltitan"
 )
 ```
 
 ### 复合条件进化
+
 ```python
-create_complete_package(
-    "Twilightfox", 10010, "dark",
+# 亲密度 + 时间条件
+create_pokemon_with_stats(
+    name="Sparkpup",
+    dex=10003,
+    primary_type="electric",
     evolution_variant="level_up",
-    evolution_target="Nightwolf",
-    evolution_friendship=160,
-    evolution_time_range="night"
+    evolution_level=18,
+    evolution_friendship=220,
+    evolution_time_range="night",
+    evolution_target="Thunderwolf"
 )
 ```
 
-## 📊 API 变更
+### 招式类型条件
 
-### 新增参数
-
-- `evolution_variant`: 进化类型（"level_up", "item_interact", "trade"）
-- `evolution_item`: 进化道具（仅 item_interact 需要）
-- `evolution_friendship`: 亲密度要求
-- `evolution_time_range`: 时间要求
-- `evolution_move_type`: 招式类型要求
-
-### 兼容性
-
-✅ 向后兼容 v1.2.0
-- 旧的进化配置仍然有效
-- 默认使用 `level_up` 类型
-
-## 🔍 验证规则
-
-1. **进化类型验证**
-   - 必须是支持的类型之一
-   - item_interact 必须指定 evolution_item
-
-2. **进化目标验证**
-   - 目标宝可梦必须已存在
-   - 不能进化为自己
-
-3. **条件验证**
-   - 等级：1-100
-   - 亲密度：0-255
-   - 时间：day/night/dusk/dawn
-   - 招式类型：必须是有效的属性类型
-
-## 📝 已知限制
-
-暂不支持的进化类型：
-- 地区形态进化
-- 特殊条件进化（如倒立、特定招式）
-- 性别相关进化
-
-这些功能计划在后续版本中添加。
-
-## 🙏 鸣谢
-
-感谢测试过程中发现的问题反馈，特别是交换进化 bug 的报告。
+```python
+# 掌握妖精系招式进化
+create_pokemon_with_stats(
+    name="Eevee",
+    dex=133,
+    primary_type="normal",
+    evolution_variant="level_up",
+    evolution_level=1,
+    evolution_move_type="fairy",
+    evolution_target="Sylveon"
+)
+```
 
 ---
 
-**完整更新日志：** 查看 [CHANGELOG.md](CHANGELOG.md)
+## 🔧 API 变更
 
-**文档：** 查看 [README.md](README.md)
+### 新增参数
+
+#### `create_pokemon_with_stats` & `create_complete_package`
+
+```python
+evolution_variant: str = "level_up"        # 进化类型
+evolution_item: str = None                  # 进化道具（item_interact 需要）
+evolution_friendship: int = None            # 亲密度要求（0-255）
+evolution_time_range: str = None            # 时间要求（day/night/dusk/dawn）
+evolution_move_type: str = None             # 招式类型要求（如 "fairy"）
+```
+
+---
+
+## 📊 进化字段规则
+
+| 进化类型 | `requiredContext` | 说明 |
+|----------|------------------|------|
+| `level_up` | ❌ 不需要 | 等级进化只需要 requirements |
+| `trade` | ❌ 不需要 | 交换进化不需要额外参数 |
+| `item_interact` | ✅ **必需** | 必须指定进化道具 |
+
+---
+
+## 🧪 测试
+
+### 测试包
+
+生成了 6 个测试包验证所有功能：
+
+```bash
+python generate_v1.3.0_test_packages.py
+```
+
+测试覆盖：
+- ✅ 等级进化（Firepup）
+- ✅ 道具进化（Sparkpup + 雷之石）
+- ✅ 交换进化（Ironpup）
+- ✅ 亲密度条件（Shadowpup）
+- ✅ 时间条件（Moonpup）
+- ✅ 招式类型条件（Fairypup）
+
+### 验证器测试
+
+```bash
+python test_v1.3.0_validator.py
+```
+
+---
+
+## 📚 文档更新
+
+- ✅ 创建 `MCP_COVERAGE_ANALYSIS.md` - 功能覆盖率分析
+- ✅ 更新 README.md 支持的进化类型说明
+- ✅ 更新 CHANGELOG.md
+
+---
+
+## 🎯 当前支持的进化机制
+
+### ✅ 已支持（v1.3.0）
+
+1. **等级进化** - 基础进化机制
+2. **道具进化** - 使用进化石等道具
+3. **交换进化** - 通信交换进化
+4. **亲密度条件** - 亲密度要求
+5. **时间条件** - 昼夜时间限制
+6. **招式类型条件** - 掌握特定属性招式
+
+### ⏳ 计划支持（v1.4.0+）
+
+7. **性别条件** - 性别限制（properties - gender）
+8. **性格条件** - 性格影响（properties - nature）
+9. **伤害条件** - 受到特定伤害（damage_taken）
+10. **双属性支持** - secondaryType 字段
+
+---
+
+## 📦 完整示例
+
+### 一键生成完整资源包
+
+```python
+create_complete_package(
+    name="Eevee",
+    dex=133,
+    primary_type="normal",
+    hp=55, attack=55, defence=50,
+    special_attack=45, special_defence=65, speed=55,
+    moves=[
+        "1:tackle",
+        "1:tail_whip",
+        "5:sand_attack",
+        "tm:swift"
+    ],
+    evolution_variant="item_interact",
+    evolution_item="cobblemon:fire_stone",
+    evolution_target="Flareon"
+)
+```
+
+---
+
+## 🚀 下一步计划（v1.4.0）
+
+基于 `MCP_COVERAGE_ANALYSIS.md` 的分析：
+
+### Phase 1: 基础字段扩展
+- [ ] `secondaryType` - 双属性支持
+- [ ] `abilities` - 灵活特性配置（支持隐藏特性）
+- [ ] `maleRatio` - 性别比例
+- [ ] `evYield` - 努力值产出
+- [ ] `catchRate` - 捕获率
+- [ ] `baseFriendship` - 初始亲密度
+- [ ] `height`, `weight`, `baseScale` - 体型配置
+
+### Phase 2: 性别/性格进化（v1.5.0）
+- [ ] `properties` 条件支持
+- [ ] 性别条件进化
+- [ ] 性格条件进化
+
+### Phase 3: 多形态系统（v1.6.0）
+- [ ] `forms` 字段支持
+- [ ] 地区形态配置
+- [ ] Gmax 形态配置
+
+---
+
+## 📊 统计
+
+- **2 个文件变更**（server.py, generate_v1.3.0_test_packages.py）
+- **新增功能**: 3 种进化类型，5 种进化条件
+- **修复 Bug**: 1 个关键修复（交换进化）
+- **测试包**: 6 个完整测试包
+- **文档更新**: 3 个文档
+
+---
+
+## 🙏 致谢
+
+感谢用户 @JX-YL 发现并报告交换进化 Bug！
+
+---
+
+## 📥 安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/JX-YL/cobblemon-mcp-server.git
+
+# 安装依赖
+cd cobblemon-mcp-server
+pip install -r requirements.txt
+
+# 启动服务器
+python server.py
+```
+
+## 🔗 相关链接
+
+- [GitHub Repository](https://github.com/JX-YL/cobblemon-mcp-server)
+- [功能覆盖率分析](./MCP_COVERAGE_ANALYSIS.md)
+- [Issue Tracker](https://github.com/JX-YL/cobblemon-mcp-server/issues)
+
+---
+
+**完整更新日志**: [v1.2.0...v1.3.0](https://github.com/JX-YL/cobblemon-mcp-server/compare/v1.2.0...v1.3.0)
 

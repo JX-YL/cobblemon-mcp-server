@@ -1,125 +1,223 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+所有重要变更都将记录在此文件中。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
-## [1.4.0] - 2025-10-23
+## [v1.3.0] - 2025-10-23
 
-### Added
-- 基础字段扩展
-  - ✅ 双属性支持 (secondaryType)
-  - ✅ 灵活特性配置 (abilities) - 支持普通特性和隐藏特性 `h:` 前缀
-  - ✅ 性别比例配置 (maleRatio) - 支持 0.0-1.0 和 -1（无性别）
-  - ✅ 捕获率配置 (catchRate) - 3-255
-  - ✅ 初始亲密度配置 (baseFriendship) - 0-255
-  - ✅ 体型数据配置 (height/weight)
-  - ✅ 孵蛋周期配置 (eggCycles) - 1-120
-- 努力值系统
-  - ✅ 努力值产出配置 (evYield)
-  - ✅ 每项 0-3，总和限制 ≤3
-- 新增验证器
-  - TypeValidator - 属性类型验证
-  - AbilityValidator - 特性格式验证
-  - StatsValidator - 数值范围验证
-- 生成测试包
-  - Toxtricity - 双属性 + 努力值
-  - Nidorina - 性别比例（全雌）
-  - Mewtwo - 无性别 + 传说捕获率
-  - Blissey - 高努力值 + 高亲密度
-  - Eevee - 完整配置示例
+### ✨ 新增功能
 
-### Changed
-- 更新 `create_pokemon_with_stats` 工具
-  - 新增 16 个参数
-  - 全面的验证系统
-- 更新 `create_complete_package` 工具
-  - 支持所有新字段
-- 优化默认值
-  - catchRate: 45（进化型难度）
-  - baseFriendship: 50（标准值）
-  - maleRatio: 0.5（50/50）
+- **多进化类型支持**
+  - `level_up` - 等级进化（已有功能）
+  - `item_interact` - 道具进化（新增）
+  - `trade` - 交换进化（新增）
 
-### Documentation
-- 更新 README 展示 v1.4.0 功能
-- 创建 v1.4.0 设计文档
-- 添加完整使用示例
+- **复合进化条件支持**
+  - `level` - 等级要求
+  - `friendship` - 亲密度要求（0-255）
+  - `time_range` - 时间要求（day/night/dusk/dawn）
+  - `has_move_type` - 招式类型要求
+  - `biome` - 生物群系要求
 
-## [1.3.0] - 2025-10-23
+- **新增参数**
+  - `evolution_variant` - 指定进化类型
+  - `evolution_item` - 道具进化所需道具
+  - `evolution_friendship` - 亲密度条件
+  - `evolution_time_range` - 时间条件
+  - `evolution_move_type` - 招式类型条件
 
-### Added
-- 多种进化类型支持
-  - ✅ 等级进化 (level_up)
-  - ✅ 道具进化 (item_interact) - 支持 11 种进化石
-  - ✅ 交换进化 (trade)
-- 复合进化条件支持
-  - ✅ 等级条件 (level)
-  - ✅ 亲密度条件 (friendship)
-  - ✅ 时间条件 (time_range) - day/night/dusk/dawn
-  - ✅ 招式类型条件 (has_move_type)
-  - ✅ 生物群系条件 (biome)
-- 进化验证增强
-  - 验证进化类型 (variant)
-  - 验证进化条件 (requirements)
-  - 验证道具有效性
-- 生成测试包功能
-  - 生成多组测试包展示不同进化类型
-  - 自动生成测试文档
+### 🐛 Bug 修复
 
-### Fixed
-- 🐛 修复交换进化不生效的问题
-  - 移除 level_up 和 trade 类型的错误 `requiredContext` 字段
-  - 仅为 item_interact 类型添加 `requiredContext`
-- 🐛 修复进化配置验证问题
-  - 增强进化目标存在性检查
+- **关键修复** - 交换进化不生效问题
+  - 移除了 `level_up` 和 `trade` 类型错误的 `requiredContext: null` 字段
+  - 仅 `item_interact` 类型保留 `requiredContext` 字段
+
+### 🔧 改进
+
+- **EvolutionValidator 增强**
+  - 验证所有进化类型和条件
+  - 检查 `requiredContext` 字段正确性
+  - 验证条件值范围（friendship, time_range）
+
+### 🧪 测试
+
+- 新增 `generate_v1.3.0_test_packages.py` - 生成 6 个测试包
+- 新增 `test_v1.3.0_validator.py` - 验证器测试
+- 覆盖所有进化类型和条件
+
+### 📝 文档
+
+- 新增 `MCP_COVERAGE_ANALYSIS.md` - 功能覆盖率分析（45%）
+- 新增 `RELEASE_v1.3.0.md` - 详细发布说明
+
+### 示例
+
+```python
+# 道具进化
+create_complete_package(
+    name="Sparkpup",
+    dex=10003,
+    primary_type="electric",
+    evolution_variant="item_interact",
+    evolution_item="cobblemon:thunder_stone",
+    evolution_target="Thunderwolf"
+)
+
+# 交换进化
+create_complete_package(
+    name="Ironpup",
+    dex=10004,
+    primary_type="steel",
+    evolution_variant="trade",
+    evolution_target="Steeltitan"
+)
+```
+
+---
+
+## [v1.2.0] - 2025-10-23
+
+### ✨ 新增功能
+
+- **进化验证系统**
+  - 自动验证进化目标是否存在
   - 防止自我进化配置
+  - 等级范围验证（1-100）
+  - 智能建议可用进化目标
 
-### Changed
-- 扩展 `EvolutionValidator` 功能
-- 更新 `create_pokemon_with_stats` 工具参数
-- 更新 `create_complete_package` 工具参数
-- 优化错误提示信息
+### 📁 项目结构优化
 
-## [1.2.0] - 2025-10-23
+- 创建 `docs/` 目录统一管理文档
+- 创建 `tests_archive/` 归档测试文件
+- 保持项目根目录整洁
 
-### Added
-- 进化系统基础支持
-  - 进化目标验证
-  - 进化等级配置
-  - 防止自我进化
-- 招式系统支持
-  - 等级招式配置
-  - TM/HM 招式配置
-  - 蛋招式配置
+### 🔧 改进
 
-### Fixed
-- 修复非法进化目标导致游戏崩溃的问题
+- `create_pokemon_with_stats` 集成进化验证
+- 提供详细错误信息和建议
 
-## [1.1.0] - 2025-10-22
+### 🧪 测试
 
-### Added
-- 招式系统初步实现
-- 能力值自定义配置
+- 新增 `generate_random_test.py` - 随机测试包生成
+- 完整进化链测试
 
-## [1.0.0] - 2025-10-22
+---
 
-### Added
-- 基础宝可梦创建功能
-- 官方参考数据查询
-- 资源包生成功能
-- MCP 服务器基础框架
-- 命名规范验证
-- 图鉴号验证
+## [v1.1.0] - 2025-10-22
 
-### Features
-- `create_pokemon` - 创建基础宝可梦
-- `create_pokemon_with_stats` - 创建带能力值的宝可梦
-- `get_official_reference` - 查询官方数据
-- `save_pokemon` - 保存宝可梦配置
-- `create_complete_package` - 生成完整资源包
+### ✨ 新增功能
 
-[1.3.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.3.0
-[1.2.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.2.0
-[1.1.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.1.0
-[1.0.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.0.0
+- **招式系统支持**
+  - `create_pokemon_with_stats` 和 `create_complete_package` 现在支持 `moves` 参数
+  - 支持等级学习招式、TM招式、蛋招式、教学招式
+  - 格式：`["1:tackle", "5:ember", "tm:flamethrower", "egg:morningsun"]`
+
+- **进化系统支持**
+  - `create_pokemon_with_stats` 和 `create_complete_package` 现在支持进化配置
+  - 通过 `evolution_level` 和 `evolution_target` 参数设置
+  - 自动生成符合 Cobblemon 标准的进化数据结构
+  
+- **README 增强**
+  - 添加 GitHub Badge（版本、提交、Python版本、许可证）
+  - 添加详细的使用指南
+  - 添加 MCP 工具列表
+  - 添加文档链接
+
+### 🧪 测试
+
+- 新增 `test_moves_and_evolutions.py`
+  - 完整测试招式配置
+  - 完整测试进化配置
+  - 验证生成文件格式
+  - 与官方 Bulbasaur 格式对比
+
+### 📝 文档
+
+- 新增 `CHANGELOG.md`
+  - 记录版本变更历史
+  - 记录功能更新
+
+### 示例
+
+创建带招式和进化的宝可梦：
+
+```python
+from server import mcp
+
+# 使用 MCP Tool
+result = await mcp.tool_call("create_complete_package",
+    name="Flamepup",
+    dex=4001,
+    primary_type="fire",
+    hp=65, attack=80, defence=60,
+    special_attack=70, special_defence=55, speed=75,
+    moves=[
+        "1:tackle",
+        "5:ember",
+        "12:bite",
+        "tm:flamethrower",
+        "egg:closecombat"
+    ],
+    evolution_level=16,
+    evolution_target="Blazehound"
+)
+```
+
+---
+
+## [v1.0.0] - 2025-10-22
+
+### ✨ 初始版本
+
+- **MCP Server 基础框架**
+  - 基于 FastMCP 构建
+  - 支持 Cursor IDE 集成
+
+- **核心工具**
+  - `create_pokemon` - 创建基础宝可梦
+  - `create_pokemon_with_stats` - 创建带自定义能力值的宝可梦
+  - `create_complete_package` - 一键生成完整资源包
+  - `get_official_reference` - 查询官方参考数据
+  - `save_pokemon` - 保存配置到文件
+
+- **验证系统**
+  - `NameValidator` - 名称规范验证（PascalCase, snake_case）
+  - `FormatValidator` - 数据格式验证
+
+- **参考数据系统**
+  - `ReferenceManager` - 管理官方 Cobblemon 数据
+  - 支持物种数据查询
+
+- **打包系统**
+  - `Packager` - 生成 Minecraft datapack 结构
+  - 自动创建 `pack.mcmeta`
+  - 正确的目录层次
+
+- **测试**
+  - Phase 1-5 完整测试
+  - 草系宝可梦生成验证
+  - 可直接导入游戏
+
+---
+
+## [未来计划]
+
+### v1.2.0 - Spawn 配置支持
+- [ ] 生物群系生成配置
+- [ ] 生成权重配置
+- [ ] 生成条件配置
+
+### v1.3.0 - Poser 配置支持
+- [ ] 动画姿态配置
+- [ ] 模型状态配置
+
+### v1.4.0 - Resolver 配置支持
+- [ ] 模型解析器配置
+- [ ] 纹理变体配置
+
+### v2.0.0 - 完整功能
+- [ ] 所有官方可配置项支持
+- [ ] Web UI 界面
+- [ ] 图形化编辑器
+
