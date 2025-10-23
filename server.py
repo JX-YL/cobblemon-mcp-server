@@ -5,6 +5,7 @@ from pathlib import Path
 from tools.reference_manager import ReferenceManager
 from tools.validators.name_validator import NameValidator
 from tools.validators.format_validator import FormatValidator
+from tools.validators.evolution_validator import EvolutionValidator
 from services.packager import Packager
 
 # 创建 MCP 实例
@@ -16,6 +17,7 @@ ref_manager = ReferenceManager()
 # 初始化验证器
 name_validator = NameValidator()
 format_validator = FormatValidator()
+evolution_validator = EvolutionValidator()
 
 # 初始化打包器
 packager = Packager()
@@ -188,6 +190,20 @@ async def create_pokemon_with_stats(
     
     # 添加进化信息
     if evolution_level and evolution_target:
+        # 验证进化目标
+        is_valid_evo, evo_errors = evolution_validator.validate_evolution(
+            name,
+            evolution_target
+        )
+        
+        if not is_valid_evo:
+            return {
+                "success": False,
+                "error": "进化配置验证失败",
+                "details": evo_errors,
+                "suggestions": evolution_validator.get_evolution_suggestions(name)[:5]
+            }
+        
         species["evolutions"] = [
             {
                 "id": f"{name.lower()}_{evolution_target.lower()}",
