@@ -4,6 +4,44 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v1.4.1] - 2025-10-23
+
+### 🐛 关键修复
+
+- **修复 v1.4.0 游戏无法加载问题**
+  - height/weight 改为整数类型（符合官方格式）
+  - height 单位：米 → 分米（dm）
+  - weight 单位：千克 → 百克（hg）
+  - 添加所有必需字段（implemented, labels, aspects, hitbox, drops）
+
+### ✨ 新增功能（与 v1.4.0 相同）
+
+- `secondaryType` - 双属性支持
+- `abilities` - 自定义特性（1-3个，支持隐藏特性）
+- `maleRatio` - 性别比例（-1=无性别，0.0-1.0）
+- `evYield` - 努力值产出（总和≤3）
+- `catchRate` - 捕获率（3-255）
+- `baseFriendship` - 初始亲密度（0-255）
+- `eggCycles` - 孵蛋周期（1-120）
+- `height`, `weight`, `baseScale` - 体型配置
+
+### ⚠️ 破坏性变更
+
+- `height`: float → int（米 → 分米）
+- `weight`: float → int（千克 → 百克）
+
+### 🧪 测试
+
+- 生成 3 个测试包验证格式
+- 所有字段符合官方格式
+- JSON 结构完全兼容
+
+### 📝 详细说明
+
+参见 `CHANGELOG_v1.4.1.md`
+
+---
+
 ## [v1.3.0] - 2025-10-23
 
 ### ✨ 新增功能

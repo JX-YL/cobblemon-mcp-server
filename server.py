@@ -100,12 +100,35 @@ async def create_pokemon_with_stats(
     name: str,
     dex: int,
     primary_type: str,
+    # 种族值
     hp: int = 100,
     attack: int = 100,
     defence: int = 100,
     special_attack: int = 100,
     special_defence: int = 100,
     speed: int = 100,
+    # v1.4.1 新增：双属性
+    secondary_type: str = None,
+    # v1.4.1 新增：自定义特性
+    abilities: list = None,
+    # v1.4.1 新增：性别比例
+    male_ratio: float = 0.5,
+    # v1.4.1 新增：体型（修复单位）
+    height: int = 10,        # 分米（dm）
+    weight: int = 100,       # 百克（hg）
+    base_scale: float = 1.0,
+    # v1.4.1 新增：捕获与繁殖
+    catch_rate: int = 45,
+    base_friendship: int = 50,
+    egg_cycles: int = 20,
+    # v1.4.1 新增：努力值产出
+    ev_hp: int = 0,
+    ev_attack: int = 0,
+    ev_defence: int = 0,
+    ev_special_attack: int = 0,
+    ev_special_defence: int = 0,
+    ev_speed: int = 0,
+    # 招式与进化（v1.3.0）
     moves: list = None,
     evolution_level: int = None,
     evolution_target: str = None,
@@ -115,48 +138,50 @@ async def create_pokemon_with_stats(
     evolution_time_range: str = None,
     evolution_move_type: str = None
 ) -> dict:
-    """创建宝可梦配置（支持自定义能力值、招式和进化）
+    """创建宝可梦配置（v1.4.1 - 修复版，完整支持官方格式）
     
     Args:
         name: 宝可梦名称
         dex: 图鉴号
         primary_type: 主属性
-        hp: HP 能力值（默认 100）
-        attack: 攻击能力值（默认 100）
-        defence: 防御能力值（默认 100）
-        special_attack: 特攻能力值（默认 100）
-        special_defence: 特防能力值（默认 100）
-        speed: 速度能力值（默认 100）
+        hp-speed: 种族值（1-255）
+        
+        # v1.4.1 新增字段
+        secondary_type: 副属性（可选，如 "poison"）
+        abilities: 特性列表（1-3个，支持隐藏特性 "h:ability"）
+        male_ratio: 雄性比例（-1=无性别，0.0-1.0）
+        height: 身高（分米，如 7 = 0.7m）
+        weight: 体重（百克，如 69 = 6.9kg）
+        base_scale: 缩放比例
+        catch_rate: 捕获率（3-255）
+        base_friendship: 初始亲密度（0-255）
+        egg_cycles: 孵蛋周期（1-120）
+        ev_hp-ev_speed: 努力值产出（0-3，总和≤3）
+        
+        # 招式与进化
         moves: 招式列表，格式如 ["1:tackle", "5:ember", "tm:flamethrower"]
-        evolution_level: 进化等级（如果有等级要求）
-        evolution_target: 进化目标宝可梦名称
-        evolution_variant: 进化类型（level_up/item_interact/trade）
-        evolution_item: 进化道具（如 "cobblemon:fire_stone"）
-        evolution_friendship: 亲密度要求（0-255）
-        evolution_time_range: 时间要求（day/night/dusk/dawn）
-        evolution_move_type: 招式类型要求（如 "fairy"）
+        evolution_*: 进化相关参数（v1.3.0）
     
     Returns:
-        宝可梦配置
+        宝可梦配置（官方格式）
     
     Examples:
-        # 等级进化
-        create_pokemon_with_stats("Emberpup", 1001, "fire", 
-            evolution_level=16, evolution_target="Blazehound")
+        # v1.4.1: 双属性 + 自定义特性
+        create_pokemon_with_stats("Toxel", 848, "electric",
+            secondary_type="poison",
+            abilities=["rattled", "static", "h:klutz"],
+            height=4, weight=110)  # 0.4m, 11kg
         
-        # 道具进化
-        create_pokemon_with_stats("Firepup", 1002, "fire",
-            evolution_target="Flaredog", evolution_variant="item_interact",
-            evolution_item="cobblemon:fire_stone")
+        # v1.4.1: 御三家配置
+        create_pokemon_with_stats("Bulbasaur", 1, "grass",
+            abilities=["overgrow", "h:chlorophyll"],
+            male_ratio=0.875,  # 87.5% 雄性
+            height=7, weight=69)  # 0.7m, 6.9kg
         
-        # 交换进化
-        create_pokemon_with_stats("Machopling", 1003, "fighting",
-            evolution_target="Musclebeast", evolution_variant="trade")
-        
-        # 复合条件进化（亲密度+时间）
-        create_pokemon_with_stats("Moonpup", 1004, "normal",
-            evolution_target="Moonwolf", evolution_friendship=160,
-            evolution_time_range="night")
+        # v1.4.1: 无性别宝可梦
+        create_pokemon_with_stats("Ditto", 132, "normal",
+            male_ratio=-1,  # 无性别
+            height=3, weight=40)
     """
     # 验证名称
     is_valid, error = name_validator.validate_species_name(name)
@@ -176,11 +201,39 @@ async def create_pokemon_with_stats(
                 "error": f"{stat_name} 必须在 1-255 之间，当前值: {stat_value}"
             }
     
-    # 生成配置
+    # 验证努力值总和
+    ev_total = ev_hp + ev_attack + ev_defence + ev_special_attack + ev_special_defence + ev_speed
+    if ev_total > 3:
+        return {
+            "success": False,
+            "error": f"努力值总和不能超过 3，当前总和: {ev_total}"
+        }
+    
+    # 使用官方格式生成配置（v1.4.1）
     species = {
-        "name": name,
+        # 1. 基础信息（必需）
+        "implemented": True,
         "nationalPokedexNumber": dex,
-        "primaryType": primary_type,
+        "name": name,
+        "primaryType": primary_type.lower(),
+        
+        # 2. 性别和体型（必需）
+        "maleRatio": male_ratio,
+        "height": height,  # 整数（分米）
+        "weight": weight,  # 整数（百克）
+        
+        # 3. 图鉴和标签（必需）
+        "pokedex": [f"cobblemon.species.{name.lower()}.desc"],
+        "labels": ["custom"],
+        "aspects": [],
+        
+        # 4. 特性（必需）
+        "abilities": abilities if abilities else ["synchronize"],
+        
+        # 5. 蛋组（必需）
+        "eggGroups": ["undiscovered"],
+        
+        # 6. 能力值（必需）
         "baseStats": {
             "hp": hp,
             "attack": attack,
@@ -189,19 +242,44 @@ async def create_pokemon_with_stats(
             "special_defence": special_defence,
             "speed": speed
         },
-        "abilities": ["overgrow"],
-        "eggGroups": ["undiscovered"],
+        
+        # 7. 努力值产出（必需）
+        "evYield": {
+            "hp": ev_hp,
+            "attack": ev_attack,
+            "defence": ev_defence,
+            "special_attack": ev_special_attack,
+            "special_defence": ev_special_defence,
+            "speed": ev_speed
+        },
+        
+        # 8. 经验值系统（必需）
         "baseExperienceYield": 64,
         "experienceGroup": "medium_slow",
-        "behaviour": {
-            "walk": {"walkSpeed": 0.27},
-            "resting": {
-                "canSleep": True,
-                "willSleepOnBed": True,
-                "light": "0-4"
-            }
+        
+        # 9. 捕获和繁殖（必需）
+        "catchRate": catch_rate,
+        "eggCycles": egg_cycles,
+        "baseFriendship": base_friendship,
+        
+        # 10. 实体属性（必需）
+        "baseScale": base_scale,
+        "hitbox": {
+            "width": 0.9,
+            "height": 1.0,
+            "fixed": False
+        },
+        
+        # 11. 掉落物（必需）
+        "drops": {
+            "amount": 1,
+            "entries": []
         }
     }
+    
+    # 添加副属性（可选）
+    if secondary_type:
+        species["secondaryType"] = secondary_type.lower()
     
     # 添加招式
     if moves:
@@ -372,6 +450,23 @@ async def create_complete_package(
     special_attack: int = 100,
     special_defence: int = 100,
     speed: int = 100,
+    # v1.4.1 新增
+    secondary_type: str = None,
+    abilities: list = None,
+    male_ratio: float = 0.5,
+    height: int = 10,
+    weight: int = 100,
+    base_scale: float = 1.0,
+    catch_rate: int = 45,
+    base_friendship: int = 50,
+    egg_cycles: int = 20,
+    ev_hp: int = 0,
+    ev_attack: int = 0,
+    ev_defence: int = 0,
+    ev_special_attack: int = 0,
+    ev_special_defence: int = 0,
+    ev_speed: int = 0,
+    # 招式与进化
     moves: list = None,
     evolution_level: int = None,
     evolution_target: str = None,
@@ -381,44 +476,47 @@ async def create_complete_package(
     evolution_time_range: str = None,
     evolution_move_type: str = None
 ) -> dict:
-    """一键生成完整资源包（支持招式和多种进化类型）
+    """一键生成完整资源包（v1.4.1 - 支持官方格式所有字段）
     
     Args:
-        name: 宝可梦名称
-        dex: 图鉴号
-        primary_type: 主属性
-        hp-speed: 能力值
-        moves: 招式列表，如 ["1:tackle", "5:ember", "tm:flamethrower"]
-        evolution_level: 进化等级
-        evolution_target: 进化目标宝可梦
-        evolution_variant: 进化类型（level_up/item_interact/trade）
-        evolution_item: 进化道具
-        evolution_friendship: 亲密度要求
-        evolution_time_range: 时间要求
-        evolution_move_type: 招式类型要求
+        同 create_pokemon_with_stats（所有 v1.4.1 字段）
     
     Returns:
         完整资源包信息
     
     Examples:
-        # 等级进化
-        create_complete_package("Firemon", 2001, "fire",
-            evolution_level=16, evolution_target="Blazemon")
+        # v1.4.1: 双属性宝可梦
+        create_complete_package("Toxel", 848, "electric",
+            secondary_type="poison",
+            abilities=["rattled", "static", "h:klutz"],
+            height=4, weight=110)
         
-        # 道具进化
-        create_complete_package("Icepup", 2002, "ice",
-            evolution_target="Frostbeast", evolution_variant="item_interact",
-            evolution_item="cobblemon:ice_stone")
+        # v1.4.1: 御三家
+        create_complete_package("Bulbasaur", 1, "grass",
+            abilities=["overgrow", "h:chlorophyll"],
+            male_ratio=0.875,
+            height=7, weight=69,
+            catch_rate=45)
         
-        # 交换进化
-        create_complete_package("Trademon", 2003, "steel",
-            evolution_target="Trademega", evolution_variant="trade")
+        # v1.4.1: 传说宝可梦
+        create_complete_package("Mewtwo", 150, "psychic",
+            abilities=["pressure", "h:unnerve"],
+            male_ratio=-1,
+            height=20, weight=1220,
+            catch_rate=3,
+            base_friendship=0,
+            ev_special_attack=3)
     """
     # 1. 创建配置
     result = await create_pokemon_with_stats(
         name, dex, primary_type,
         hp, attack, defence,
         special_attack, special_defence, speed,
+        secondary_type, abilities, male_ratio,
+        height, weight, base_scale,
+        catch_rate, base_friendship, egg_cycles,
+        ev_hp, ev_attack, ev_defence,
+        ev_special_attack, ev_special_defence, ev_speed,
         moves, evolution_level, evolution_target,
         evolution_variant, evolution_item,
         evolution_friendship, evolution_time_range, evolution_move_type
