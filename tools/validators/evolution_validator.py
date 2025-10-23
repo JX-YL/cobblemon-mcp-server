@@ -7,6 +7,37 @@ import json
 class EvolutionValidator:
     """验证宝可梦进化配置的有效性"""
     
+    # 支持的进化类型
+    SUPPORTED_VARIANTS = {
+        "level_up": "等级进化",
+        "item_interact": "道具进化",
+        "trade": "交换进化"
+    }
+    
+    # 支持的进化条件类型
+    SUPPORTED_REQUIREMENTS = {
+        "level": "等级要求",
+        "friendship": "亲密度要求",
+        "time_range": "时间要求",
+        "has_move_type": "招式类型要求",
+        "biome": "生物群系要求"
+    }
+    
+    # 常用进化道具
+    COMMON_EVOLUTION_ITEMS = [
+        "cobblemon:thunder_stone",
+        "cobblemon:fire_stone",
+        "cobblemon:water_stone",
+        "cobblemon:leaf_stone",
+        "cobblemon:ice_stone",
+        "cobblemon:moon_stone",
+        "cobblemon:sun_stone",
+        "cobblemon:shiny_stone",
+        "cobblemon:dusk_stone",
+        "cobblemon:dawn_stone",
+        "cobblemon:linking_cord"
+    ]
+    
     def __init__(self):
         """初始化验证器"""
         self.known_species: Set[str] = set()
@@ -85,10 +116,18 @@ class EvolutionValidator:
         # 4. 验证进化数据结构（如果提供）
         if evolution_data:
             # 检查必需字段
-            required_fields = ['id', 'variant', 'result', 'requirements']
+            required_fields = ['id', 'variant', 'result']
             for field in required_fields:
                 if field not in evolution_data:
                     errors.append(f"进化配置缺少必需字段: {field}")
+            
+            # 检查 variant 是否支持
+            variant = evolution_data.get('variant', '')
+            if variant and variant not in self.SUPPORTED_VARIANTS:
+                errors.append(
+                    f"不支持的进化类型: {variant}\n"
+                    f"  支持的类型: {', '.join(self.SUPPORTED_VARIANTS.keys())}"
+                )
             
             # 检查 result 字段与 evolution_target 是否一致
             if 'result' in evolution_data:
@@ -99,15 +138,68 @@ class EvolutionValidator:
                         f"evolution_target='{evolution_target}'"
                     )
             
-            # 检查进化等级
+            # 根据进化类型验证特定字段
+            if variant == 'item_interact':
+                if 'requiredContext' not in evolution_data:
+                    errors.append("道具进化需要 requiredContext 字段指定进化道具")
+                elif not evolution_data['requiredContext']:
+                    errors.append("道具进化的 requiredContext 不能为空")
+            
+            # 验证进化条件
             if 'requirements' in evolution_data:
-                for req in evolution_data['requirements']:
-                    if req.get('variant') == 'level':
-                        level = req.get('minLevel', 0)
-                        if level < 1 or level > 100:
-                            errors.append(f"进化等级必须在 1-100 之间，当前: {level}")
+                req_errors = self._validate_requirements(evolution_data['requirements'])
+                errors.extend(req_errors)
         
         return len(errors) == 0, errors
+    
+    def _validate_requirements(self, requirements: List[Dict]) -> List[str]:
+        """验证进化条件
+        
+        Args:
+            requirements: 进化条件列表
+        
+        Returns:
+            错误信息列表
+        """
+        errors = []
+        
+        for i, req in enumerate(requirements):
+            req_variant = req.get('variant', '')
+            
+            # 检查条件类型是否支持
+            if req_variant and req_variant not in self.SUPPORTED_REQUIREMENTS:
+                errors.append(
+                    f"条件 #{i+1}: 不支持的条件类型 '{req_variant}'\n"
+                    f"  支持的类型: {', '.join(self.SUPPORTED_REQUIREMENTS.keys())}"
+                )
+                continue
+            
+            # 根据条件类型验证必需字段
+            if req_variant == 'level':
+                level = req.get('minLevel', 0)
+                if level < 1 or level > 100:
+                    errors.append(f"条件 #{i+1}: 进化等级必须在 1-100 之间，当前: {level}")
+            
+            elif req_variant == 'friendship':
+                friendship = req.get('amount', 0)
+                if friendship < 0 or friendship > 255:
+                    errors.append(f"条件 #{i+1}: 亲密度必须在 0-255 之间，当前: {friendship}")
+            
+            elif req_variant == 'time_range':
+                time_range = req.get('range', '')
+                valid_ranges = ['day', 'night', 'dusk', 'dawn']
+                if time_range not in valid_ranges:
+                    errors.append(
+                        f"条件 #{i+1}: 无效的时间范围 '{time_range}'\n"
+                        f"  有效值: {', '.join(valid_ranges)}"
+                    )
+            
+            elif req_variant == 'has_move_type':
+                move_type = req.get('type', '')
+                if not move_type:
+                    errors.append(f"条件 #{i+1}: has_move_type 需要指定 type 字段")
+        
+        return errors
     
     def validate_species_evolutions(
         self,

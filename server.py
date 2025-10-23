@@ -108,7 +108,12 @@ async def create_pokemon_with_stats(
     speed: int = 100,
     moves: list = None,
     evolution_level: int = None,
-    evolution_target: str = None
+    evolution_target: str = None,
+    evolution_variant: str = "level_up",
+    evolution_item: str = None,
+    evolution_friendship: int = None,
+    evolution_time_range: str = None,
+    evolution_move_type: str = None
 ) -> dict:
     """创建宝可梦配置（支持自定义能力值、招式和进化）
     
@@ -123,21 +128,35 @@ async def create_pokemon_with_stats(
         special_defence: 特防能力值（默认 100）
         speed: 速度能力值（默认 100）
         moves: 招式列表，格式如 ["1:tackle", "5:ember", "tm:flamethrower"]
-        evolution_level: 进化等级（如果有进化）
+        evolution_level: 进化等级（如果有等级要求）
         evolution_target: 进化目标宝可梦名称
+        evolution_variant: 进化类型（level_up/item_interact/trade）
+        evolution_item: 进化道具（如 "cobblemon:fire_stone"）
+        evolution_friendship: 亲密度要求（0-255）
+        evolution_time_range: 时间要求（day/night/dusk/dawn）
+        evolution_move_type: 招式类型要求（如 "fairy"）
     
     Returns:
         宝可梦配置
     
     Examples:
-        # 基础配置
-        create_pokemon_with_stats("Testmon", 1001, "fire")
+        # 等级进化
+        create_pokemon_with_stats("Emberpup", 1001, "fire", 
+            evolution_level=16, evolution_target="Blazehound")
         
-        # 带招式
-        create_pokemon_with_stats("Testmon", 1001, "fire", moves=["1:tackle", "5:ember"])
+        # 道具进化
+        create_pokemon_with_stats("Firepup", 1002, "fire",
+            evolution_target="Flaredog", evolution_variant="item_interact",
+            evolution_item="cobblemon:fire_stone")
         
-        # 带进化
-        create_pokemon_with_stats("Testmon", 1001, "fire", evolution_level=16, evolution_target="Testmon2")
+        # 交换进化
+        create_pokemon_with_stats("Machopling", 1003, "fighting",
+            evolution_target="Musclebeast", evolution_variant="trade")
+        
+        # 复合条件进化（亲密度+时间）
+        create_pokemon_with_stats("Moonpup", 1004, "normal",
+            evolution_target="Moonwolf", evolution_friendship=160,
+            evolution_time_range="night")
     """
     # 验证名称
     is_valid, error = name_validator.validate_species_name(name)
@@ -189,11 +208,62 @@ async def create_pokemon_with_stats(
         species["moves"] = moves
     
     # 添加进化信息
-    if evolution_level and evolution_target:
-        # 验证进化目标
+    if evolution_target:
+        # 构建进化配置
+        evolution_data = {
+            "id": f"{name.lower()}_{evolution_target.lower()}",
+            "variant": evolution_variant,
+            "result": evolution_target.lower(),
+            "consumeHeldItem": False,
+            "learnableMoves": [],
+            "requirements": []
+        }
+        
+        # 添加等级要求
+        if evolution_level:
+            evolution_data["requirements"].append({
+                "variant": "level",
+                "minLevel": evolution_level
+            })
+        
+        # 添加亲密度要求
+        if evolution_friendship is not None:
+            evolution_data["requirements"].append({
+                "variant": "friendship",
+                "amount": evolution_friendship
+            })
+        
+        # 添加时间要求
+        if evolution_time_range:
+            evolution_data["requirements"].append({
+                "variant": "time_range",
+                "range": evolution_time_range
+            })
+        
+        # 添加招式类型要求
+        if evolution_move_type:
+            evolution_data["requirements"].append({
+                "variant": "has_move_type",
+                "type": evolution_move_type
+            })
+        
+        # 添加道具要求（仅 item_interact 类型需要）
+        if evolution_variant == "item_interact":
+            if not evolution_item:
+                return {
+                    "success": False,
+                    "error": "道具进化需要指定 evolution_item 参数",
+                    "example": 'evolution_item="cobblemon:fire_stone"',
+                    "common_items": evolution_validator.COMMON_EVOLUTION_ITEMS[:5]
+                }
+            evolution_data["requiredContext"] = evolution_item
+        # 注意：level_up 和 trade 不需要 requiredContext 字段
+        
+        # 验证进化配置
         is_valid_evo, evo_errors = evolution_validator.validate_evolution(
             name,
-            evolution_target
+            evolution_target,
+            evolution_data
         )
         
         if not is_valid_evo:
@@ -204,22 +274,7 @@ async def create_pokemon_with_stats(
                 "suggestions": evolution_validator.get_evolution_suggestions(name)[:5]
             }
         
-        species["evolutions"] = [
-            {
-                "id": f"{name.lower()}_{evolution_target.lower()}",
-                "variant": "level_up",
-                "result": evolution_target.lower(),
-                "consumeHeldItem": False,
-                "learnableMoves": [],
-                "requirements": [
-                    {
-                        "variant": "level",
-                        "minLevel": evolution_level
-                    }
-                ],
-                "requiredContext": None
-            }
-        ]
+        species["evolutions"] = [evolution_data]
     
     # 验证格式
     is_valid, errors = format_validator.validate_species(species)
@@ -319,9 +374,14 @@ async def create_complete_package(
     speed: int = 100,
     moves: list = None,
     evolution_level: int = None,
-    evolution_target: str = None
+    evolution_target: str = None,
+    evolution_variant: str = "level_up",
+    evolution_item: str = None,
+    evolution_friendship: int = None,
+    evolution_time_range: str = None,
+    evolution_move_type: str = None
 ) -> dict:
-    """一键生成完整资源包（支持招式和进化）
+    """一键生成完整资源包（支持招式和多种进化类型）
     
     Args:
         name: 宝可梦名称
@@ -331,28 +391,37 @@ async def create_complete_package(
         moves: 招式列表，如 ["1:tackle", "5:ember", "tm:flamethrower"]
         evolution_level: 进化等级
         evolution_target: 进化目标宝可梦
+        evolution_variant: 进化类型（level_up/item_interact/trade）
+        evolution_item: 进化道具
+        evolution_friendship: 亲密度要求
+        evolution_time_range: 时间要求
+        evolution_move_type: 招式类型要求
     
     Returns:
         完整资源包信息
     
     Examples:
-        # 基础包
-        create_complete_package("Firemon", 2001, "fire")
+        # 等级进化
+        create_complete_package("Firemon", 2001, "fire",
+            evolution_level=16, evolution_target="Blazemon")
         
-        # 带招式和进化
-        create_complete_package(
-            "Firemon", 2001, "fire",
-            moves=["1:tackle", "5:ember", "10:flamewheel"],
-            evolution_level=16,
-            evolution_target="Blazemon"
-        )
+        # 道具进化
+        create_complete_package("Icepup", 2002, "ice",
+            evolution_target="Frostbeast", evolution_variant="item_interact",
+            evolution_item="cobblemon:ice_stone")
+        
+        # 交换进化
+        create_complete_package("Trademon", 2003, "steel",
+            evolution_target="Trademega", evolution_variant="trade")
     """
     # 1. 创建配置
     result = await create_pokemon_with_stats(
         name, dex, primary_type,
         hp, attack, defence,
         special_attack, special_defence, speed,
-        moves, evolution_level, evolution_target
+        moves, evolution_level, evolution_target,
+        evolution_variant, evolution_item,
+        evolution_friendship, evolution_time_range, evolution_move_type
     )
     
     if not result.get("success"):

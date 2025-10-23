@@ -1,123 +1,84 @@
 # Changelog
 
-所有重要变更都将记录在此文件中。
+All notable changes to this project will be documented in this file.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.1.0] - 2025-10-22
+## [1.3.0] - 2025-10-23
 
-### ✨ 新增功能
+### Added
+- 多种进化类型支持
+  - ✅ 等级进化 (level_up)
+  - ✅ 道具进化 (item_interact) - 支持 11 种进化石
+  - ✅ 交换进化 (trade)
+- 复合进化条件支持
+  - ✅ 等级条件 (level)
+  - ✅ 亲密度条件 (friendship)
+  - ✅ 时间条件 (time_range) - day/night/dusk/dawn
+  - ✅ 招式类型条件 (has_move_type)
+  - ✅ 生物群系条件 (biome)
+- 进化验证增强
+  - 验证进化类型 (variant)
+  - 验证进化条件 (requirements)
+  - 验证道具有效性
+- 生成测试包功能
+  - 生成多组测试包展示不同进化类型
+  - 自动生成测试文档
 
-- **招式系统支持**
-  - `create_pokemon_with_stats` 和 `create_complete_package` 现在支持 `moves` 参数
-  - 支持等级学习招式、TM招式、蛋招式、教学招式
-  - 格式：`["1:tackle", "5:ember", "tm:flamethrower", "egg:morningsun"]`
+### Fixed
+- 🐛 修复交换进化不生效的问题
+  - 移除 level_up 和 trade 类型的错误 `requiredContext` 字段
+  - 仅为 item_interact 类型添加 `requiredContext`
+- 🐛 修复进化配置验证问题
+  - 增强进化目标存在性检查
+  - 防止自我进化配置
 
-- **进化系统支持**
-  - `create_pokemon_with_stats` 和 `create_complete_package` 现在支持进化配置
-  - 通过 `evolution_level` 和 `evolution_target` 参数设置
-  - 自动生成符合 Cobblemon 标准的进化数据结构
-  
-- **README 增强**
-  - 添加 GitHub Badge（版本、提交、Python版本、许可证）
-  - 添加详细的使用指南
-  - 添加 MCP 工具列表
-  - 添加文档链接
+### Changed
+- 扩展 `EvolutionValidator` 功能
+- 更新 `create_pokemon_with_stats` 工具参数
+- 更新 `create_complete_package` 工具参数
+- 优化错误提示信息
 
-### 🧪 测试
+## [1.2.0] - 2025-10-23
 
-- 新增 `test_moves_and_evolutions.py`
-  - 完整测试招式配置
-  - 完整测试进化配置
-  - 验证生成文件格式
-  - 与官方 Bulbasaur 格式对比
+### Added
+- 进化系统基础支持
+  - 进化目标验证
+  - 进化等级配置
+  - 防止自我进化
+- 招式系统支持
+  - 等级招式配置
+  - TM/HM 招式配置
+  - 蛋招式配置
 
-### 📝 文档
+### Fixed
+- 修复非法进化目标导致游戏崩溃的问题
 
-- 新增 `CHANGELOG.md`
-  - 记录版本变更历史
-  - 记录功能更新
+## [1.1.0] - 2025-10-22
 
-### 示例
+### Added
+- 招式系统初步实现
+- 能力值自定义配置
 
-创建带招式和进化的宝可梦：
+## [1.0.0] - 2025-10-22
 
-```python
-from server import mcp
+### Added
+- 基础宝可梦创建功能
+- 官方参考数据查询
+- 资源包生成功能
+- MCP 服务器基础框架
+- 命名规范验证
+- 图鉴号验证
 
-# 使用 MCP Tool
-result = await mcp.tool_call("create_complete_package",
-    name="Flamepup",
-    dex=4001,
-    primary_type="fire",
-    hp=65, attack=80, defence=60,
-    special_attack=70, special_defence=55, speed=75,
-    moves=[
-        "1:tackle",
-        "5:ember",
-        "12:bite",
-        "tm:flamethrower",
-        "egg:closecombat"
-    ],
-    evolution_level=16,
-    evolution_target="Blazehound"
-)
-```
+### Features
+- `create_pokemon` - 创建基础宝可梦
+- `create_pokemon_with_stats` - 创建带能力值的宝可梦
+- `get_official_reference` - 查询官方数据
+- `save_pokemon` - 保存宝可梦配置
+- `create_complete_package` - 生成完整资源包
 
----
-
-## [v1.0.0] - 2025-10-22
-
-### ✨ 初始版本
-
-- **MCP Server 基础框架**
-  - 基于 FastMCP 构建
-  - 支持 Cursor IDE 集成
-
-- **核心工具**
-  - `create_pokemon` - 创建基础宝可梦
-  - `create_pokemon_with_stats` - 创建带自定义能力值的宝可梦
-  - `create_complete_package` - 一键生成完整资源包
-  - `get_official_reference` - 查询官方参考数据
-  - `save_pokemon` - 保存配置到文件
-
-- **验证系统**
-  - `NameValidator` - 名称规范验证（PascalCase, snake_case）
-  - `FormatValidator` - 数据格式验证
-
-- **参考数据系统**
-  - `ReferenceManager` - 管理官方 Cobblemon 数据
-  - 支持物种数据查询
-
-- **打包系统**
-  - `Packager` - 生成 Minecraft datapack 结构
-  - 自动创建 `pack.mcmeta`
-  - 正确的目录层次
-
-- **测试**
-  - Phase 1-5 完整测试
-  - 草系宝可梦生成验证
-  - 可直接导入游戏
-
----
-
-## [未来计划]
-
-### v1.2.0 - Spawn 配置支持
-- [ ] 生物群系生成配置
-- [ ] 生成权重配置
-- [ ] 生成条件配置
-
-### v1.3.0 - Poser 配置支持
-- [ ] 动画姿态配置
-- [ ] 模型状态配置
-
-### v1.4.0 - Resolver 配置支持
-- [ ] 模型解析器配置
-- [ ] 纹理变体配置
-
-### v2.0.0 - 完整功能
-- [ ] 所有官方可配置项支持
-- [ ] Web UI 界面
-- [ ] 图形化编辑器
-
+[1.3.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.3.0
+[1.2.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.2.0
+[1.1.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.1.0
+[1.0.0]: https://github.com/JX-YL/cobblemon-mcp-server/releases/tag/v1.0.0
