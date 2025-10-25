@@ -7,7 +7,7 @@
 
 🌿 从零开始创建的 Cobblemon 资源包生成器 - 基于 Model Context Protocol (MCP)
 
-**最新版本**: v1.4.1 - Bug Fix Release（修复 v1.4.0 游戏无法加载问题）✅
+**最新版本**: v1.5.0 - Properties Evolution Support（性别与性格进化支持）✅
 
 ## ✨ 特性
 
@@ -26,8 +26,35 @@
 - [x] Phase 5: 功能增强
 - [x] Phase 6: 招式与进化系统
 - [x] Phase 7: 基础字段扩展（v1.4.1）
+- [x] Phase 8: 性别与性格进化（v1.5.0）
 
-## 🎯 v1.4.1 新功能 - 官方格式支持
+## 🎯 v1.5.0 新功能 - 性别与性格进化
+
+### Properties 进化条件 ⭐
+- ✅ **性别进化（Gender Evolution）** - 指定性别才能进化
+  - 支持 `gender=male`, `gender=female`, `gender=genderless`
+  - 示例：雌性 Venomtail 33级进化成 Toxempress
+  
+- ✅ **性格进化（Nature Evolution）** - 指定性格才能进化
+  - 支持所有 25 种官方性格（hardy, adamant, modest 等）
+  - 示例：Hardy 性格的 Voltbaby 30级进化成 Ampedrocker
+
+### 进化配置示例
+```python
+# 性别进化
+evolution_target="toxempress",
+evolution_level=33,
+evolution_gender="female"  # 只有雌性才能进化
+
+# 性格进化
+evolution_target="ampedrocker",
+evolution_level=30,
+evolution_nature="hardy"  # 只有 Hardy 性格才能进化
+```
+
+---
+
+## 🎯 v1.4.1 功能 - 官方格式支持
 
 ### 双属性 & 自定义特性
 - ✅ **secondaryType** - 双属性宝可梦（如 Toxel: electric/poison）
@@ -53,9 +80,9 @@ weight=69,  # 69百克 = 6.9千克
 
 ---
 
-## 🧬 支持的进化机制（v1.3.0）
+## 🧬 支持的进化机制
 
-### 进化类型
+### 进化类型（v1.3.0）
 - ✅ **等级进化（level_up）** - 达到指定等级进化
 - ✅ **道具进化（item_interact）** - 使用进化石等道具
 - ✅ **交换进化（trade）** - 通信交换进化
@@ -65,7 +92,8 @@ weight=69,  # 69百克 = 6.9千克
 - ✅ **亲密度条件** - 指定最低亲密度（0-255）
 - ✅ **时间条件** - 白天/夜晚/黄昏/黎明
 - ✅ **招式类型条件** - 掌握特定属性的招式
-- ✅ **生物群系条件** - 特定地形/环境
+- ✅ **性别条件（v1.5.0）** - 指定性别才能进化 ⭐
+- ✅ **性格条件（v1.5.0）** - 指定性格才能进化 ⭐
 
 ## 📦 安装
 
