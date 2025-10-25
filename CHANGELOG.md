@@ -4,6 +4,92 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v1.5.0] - 2025-10-25
+
+### ✨ 新增功能
+
+- **🎯 Properties 进化条件支持**
+  - **性别进化（Gender Evolution）** - 指定性别才能进化
+    - 支持 `evolution_gender` 参数（male, female, genderless）
+    - 官方格式：`{"variant": "properties", "target": "gender=female"}`
+    - 示例：雌性 Venomtail 33级进化成 Toxempress
+  
+  - **性格进化（Nature Evolution）** - 指定性格才能进化
+    - 支持 `evolution_nature` 参数（25种官方性格）
+    - 官方格式：`{"variant": "properties", "target": "宝可梦名 nature=hardy"}`
+    - 示例：Hardy 性格的 Voltbaby 30级进化成 Ampedrocker
+
+- **新增验证器**
+  - `PropertiesValidator` - 验证性别和性格条件
+  - `BiomeValidator` - 验证生物群系条件（预留）
+  - `DamageValidator` - 验证伤害条件（预留）
+
+### 🔧 改进
+
+- **EvolutionValidator 增强**
+  - 支持 `properties` 进化变体
+  - 集成 PropertiesValidator 验证
+  - 完善错误提示信息
+
+- **server.py 更新**
+  - 添加 `evolution_gender` 参数
+  - 添加 `evolution_nature` 参数
+  - 正确构建 properties 进化条件
+
+### 🧪 测试
+
+- **渐进式测试方法**
+  - 从简单到复杂逐步验证
+  - 成功测试性别进化（Venomtail, Fairypup）
+  - 成功测试性格进化（Voltbaby, Moonpup）
+  - 4 个进化链全部通过测试
+
+- **新增测试脚本**
+  - `generate_showcase_mcp.py` - 生成 v1.5.0 功能展示包
+  - 包含 9 个宝可梦，演示所有功能
+
+### 📝 文档
+
+- **快速检验指令**
+  - 详细的测试步骤
+  - 一键测试命令
+  - 功能验证清单
+
+### 🎓 经验总结
+
+- **关键发现**
+  - `behaviour` 字段不是必需的（可选）
+  - 自定义宝可梦进化链完全可行
+  - Properties 进化格式经过官方验证
+
+### 示例
+
+```python
+# 性别进化
+create_complete_package(
+    name="Venomtail",
+    dex=99001,
+    primary_type="poison",
+    secondary_type="fire",
+    evolution_target="toxempress",
+    evolution_level=33,
+    evolution_gender="female"  # 只有雌性才能进化
+)
+
+# 性格进化
+create_complete_package(
+    name="Voltbaby",
+    dex=99003,
+    primary_type="electric",
+    secondary_type="poison",
+    evolution_target="ampedrocker",
+    evolution_level=30,
+    evolution_nature="hardy"  # 只有 Hardy 性格才能进化
+)
+```
+
+---
+
 ## [v1.4.1] - 2025-10-23
 
 ### 🐛 关键修复
