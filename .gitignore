@@ -39,6 +39,9 @@ output/
 *.log
 .env
 
+# Video production (user workspace)
+video_production/
+
 # Test files
 test_*.py
 *_test.py
