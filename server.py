@@ -216,7 +216,14 @@ async def create_pokemon_with_stats(
         "nationalPokedexNumber": dex,
         "name": name,
         "primaryType": primary_type.lower(),
-        
+    }
+    
+    # 添加副属性（可选，必须紧跟 primaryType）
+    if secondary_type:
+        species["secondaryType"] = secondary_type.lower()
+    
+    # 继续构建其他字段
+    species.update({
         # 2. 性别和体型（必需）
         "maleRatio": male_ratio,
         "height": height,  # 整数（分米）
@@ -275,11 +282,7 @@ async def create_pokemon_with_stats(
             "amount": 1,
             "entries": []
         }
-    }
-    
-    # 添加副属性（可选）
-    if secondary_type:
-        species["secondaryType"] = secondary_type.lower()
+    })
     
     # 添加招式
     if moves:
