@@ -136,7 +136,20 @@ async def create_pokemon_with_stats(
     evolution_item: str = None,
     evolution_friendship: int = None,
     evolution_time_range: str = None,
-    evolution_move_type: str = None
+    evolution_move_type: str = None,
+    # v1.5.0: 性别与性格进化
+    evolution_gender: str = None,
+    evolution_nature: str = None,
+    # v1.5.1: 生物群系与伤害进化
+    evolution_biome: str = None,
+    evolution_damage_amount: int = None,
+    # v1.6.0: 招式系统完善
+    level_moves: dict = None,        # {1: ["tackle"], 5: ["ember"]}
+    egg_moves: list = None,          # ["bellydrum", "dragontail"]
+    tm_moves: list = None,           # ["flamethrower", "fireblast"]
+    tutor_moves: list = None,        # ["blastburn", "heatwave"]
+    legacy_moves: list = None,       # ["attract", "return"]
+    special_moves: list = None       # ["celebrate"]
 ) -> dict:
     """创建宝可梦配置（v1.4.1 - 修复版，完整支持官方格式）
     
@@ -284,9 +297,79 @@ async def create_pokemon_with_stats(
         }
     })
     
-    # 添加招式
+    # v1.6.0: 添加招式（支持分类）
+    all_moves = []
+    
+    # 导入招式验证器和格式化器
+    from tools.validators.move_validator import MoveValidator, MoveFormatter
+    
+    # 处理等级招式
+    if level_moves:
+        is_valid, errors = MoveValidator.validate_level_moves(level_moves)
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"等级招式验证失败：{errors}"
+            }
+        all_moves.extend(MoveFormatter.format_level_moves(level_moves))
+    
+    # 处理蛋招式
+    if egg_moves:
+        is_valid, errors = MoveValidator.validate_move_list(egg_moves, "蛋招式")
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"蛋招式验证失败：{errors}"
+            }
+        all_moves.extend(MoveFormatter.format_egg_moves(egg_moves))
+    
+    # 处理TM招式
+    if tm_moves:
+        is_valid, errors = MoveValidator.validate_move_list(tm_moves, "TM招式")
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"TM招式验证失败：{errors}"
+            }
+        all_moves.extend(MoveFormatter.format_tm_moves(tm_moves))
+    
+    # 处理教学招式
+    if tutor_moves:
+        is_valid, errors = MoveValidator.validate_move_list(tutor_moves, "教学招式")
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"教学招式验证失败：{errors}"
+            }
+        all_moves.extend(MoveFormatter.format_tutor_moves(tutor_moves))
+    
+    # 处理遗留招式
+    if legacy_moves:
+        is_valid, errors = MoveValidator.validate_move_list(legacy_moves, "遗留招式")
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"遗留招式验证失败：{errors}"
+            }
+        all_moves.extend(MoveFormatter.format_legacy_moves(legacy_moves))
+    
+    # 处理特殊招式
+    if special_moves:
+        is_valid, errors = MoveValidator.validate_move_list(special_moves, "特殊招式")
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"特殊招式验证失败：{errors}"
+            }
+        all_moves.extend(MoveFormatter.format_special_moves(special_moves))
+    
+    # 兼容旧API（v1.5.1及之前）
     if moves:
-        species["moves"] = moves
+        all_moves.extend(moves)
+    
+    # 添加到species数据
+    if all_moves:
+        species["moves"] = all_moves
     
     # 添加进化信息
     if evolution_target:

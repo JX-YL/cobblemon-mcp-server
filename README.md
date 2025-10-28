@@ -7,7 +7,7 @@
 
 🌿 从零开始创建的 Cobblemon 资源包生成器 - 基于 Model Context Protocol (MCP)
 
-**最新版本**: v1.5.0 - Properties Evolution Support（性别与性格进化支持）✅
+**最新版本**: v1.6.0 - Move System Enhancement（招式系统完善）✅
 
 ## ✨ 特性
 
@@ -27,6 +27,77 @@
 - [x] Phase 6: 招式与进化系统
 - [x] Phase 7: 基础字段扩展（v1.4.1）
 - [x] Phase 8: 性别与性格进化（v1.5.0）
+- [x] Phase 9: 生物群系与伤害进化（v1.5.1）
+- [x] Phase 10: 招式系统完善（v1.6.0）
+
+## 🎯 v1.6.0 新功能 - 招式系统完善 ⭐
+
+### 招式分类系统
+v1.6.0 完整支持官方 Cobblemon 的所有招式分类：
+
+- ✅ **等级招式（Level Moves）** - 升级自动学会
+  ```python
+  level_moves={
+      1: ["tackle", "growl"],
+      5: ["ember"],
+      10: ["flamethrower"]
+  }
+  ```
+
+- ✅ **蛋招式（Egg Moves）** - 遗传招式
+  ```python
+  egg_moves=["bellydrum", "dragontail", "metalclaw"]
+  ```
+
+- ✅ **TM招式（TM Moves）** - 技能机器招式
+  ```python
+  tm_moves=["flamethrower", "fireblast", "swordsdance"]
+  ```
+
+- ✅ **教学招式（Tutor Moves）** - 教学招式
+  ```python
+  tutor_moves=["blastburn", "heatwave", "firepunch"]
+  ```
+
+- ✅ **遗留招式（Legacy Moves）** - 旧版本招式
+  ```python
+  legacy_moves=["attract", "return", "toxic"]
+  ```
+
+- ✅ **特殊招式（Special Moves）** - 特殊事件招式
+  ```python
+  special_moves=["celebrate", "howl"]
+  ```
+
+### 招式验证系统
+- ✅ **515个官方招式** - 自动验证招式是否存在
+- ✅ **智能建议** - 拼写错误时提供相似招式建议
+- ✅ **自动排序** - 等级招式按等级自动排序
+- ✅ **格式化** - 自动转换为官方格式（`1:tackle`, `egg:bellydrum`）
+
+### 完整示例
+```python
+create_pokemon_with_stats(
+    name="Charmander",
+    dex=4,
+    primary_type="fire",
+    
+    # v1.6.0: 完整招式系统
+    level_moves={
+        1: ["scratch", "growl"],
+        4: ["ember"],
+        17: ["firefang"],
+        40: ["flareblitz"]
+    },
+    egg_moves=["bellydrum", "dragontail", "metalclaw"],
+    tm_moves=["flamethrower", "fireblast", "swordsdance"],
+    tutor_moves=["blastburn", "heatwave", "firepunch"],
+    legacy_moves=["attract", "return", "toxic"],
+    special_moves=["celebrate"]
+)
+```
+
+---
 
 ## 🎯 v1.5.0 新功能 - 性别与性格进化
 

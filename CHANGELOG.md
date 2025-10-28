@@ -4,6 +4,100 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v1.6.0] - 2025-10-28
+
+### ✨ 新增功能
+
+- **🎯 招式系统完善**
+  - **等级招式（Level Moves）** - 按等级自动学会的招式
+    - 支持 `level_moves` 参数（字典格式：`{1: ["tackle"], 5: ["ember"]}`）
+    - 自动按等级排序
+    - 官方格式：`["1:tackle", "5:ember"]`
+  
+  - **蛋招式（Egg Moves）** - 遗传招式
+    - 支持 `egg_moves` 参数（列表格式）
+    - 官方格式：`["egg:bellydrum", "egg:dragontail"]`
+  
+  - **TM招式（TM Moves）** - 技能机器招式
+    - 支持 `tm_moves` 参数
+    - 官方格式：`["tm:flamethrower", "tm:fireblast"]`
+  
+  - **教学招式（Tutor Moves）** - 教学招式
+    - 支持 `tutor_moves` 参数
+    - 官方格式：`["tutor:blastburn", "tutor:heatwave"]`
+  
+  - **遗留招式（Legacy Moves）** - 旧版本招式
+    - 支持 `legacy_moves` 参数
+    - 官方格式：`["legacy:attract", "legacy:return"]`
+  
+  - **特殊招式（Special Moves）** - 特殊事件招式
+    - 支持 `special_moves` 参数
+    - 官方格式：`["special:celebrate"]`
+
+- **新增验证器**
+  - `MoveValidator` - 验证招式是否在515个官方招式列表中
+    - 智能拼写检查和建议
+    - 模糊匹配相似招式
+  - `MoveFormatter` - 自动格式化招式为官方格式
+
+- **新增数据文件**
+  - `data/official_moves.json` - 515个官方招式列表
+    - 从参考包自动提取
+    - 包含所有 Cobblemon 1.5.0+ 官方招式
+
+### 🔧 改进
+
+- **server.py 更新**
+  - 添加 6 个招式分类参数
+  - 集成 MoveValidator 和 MoveFormatter
+  - 自动验证所有招式
+  - 智能错误提示（拼写建议）
+
+- **招式处理逻辑**
+  - 等级招式自动按等级排序
+  - 所有招式自动转换为官方格式
+  - 支持旧API兼容（`moves` 参数仍可用）
+
+### 🧪 测试
+
+- **渐进式测试策略**
+  - Step 1: 基础等级招式（Simplemove - 4个招式）
+  - Step 2: 多分类招式（Multimove - 9个招式）
+  - Step 3: 完整招式列表（Fullmove - 69个招式）
+
+- **新增测试脚本**
+  - `docs/tests/generate_v1.6.0_tests.py` - 生成 v1.6.0 测试包
+  - `docs/tests/V1.6.0_TEST_GUIDE.md` - 完整测试指南
+  - `docs/tests/V1.6.0_QUICK_COMMANDS.md` - 快速测试指令
+
+- **游戏内验证**
+  - ✅ 所有招式正确加载
+  - ✅ 招式按等级自动学习
+  - ✅ 6种分类全部正确显示
+  - ✅ 招式可正常使用
+
+### 📚 文档
+
+- **新增设计文档**
+  - `docs/design/V1.6.0_DESIGN.md` - 招式系统设计文档
+  - `docs/design/DATAPACK_COVERAGE_ANALYSIS.md` - 数据包覆盖率分析
+
+- **更新主文档**
+  - README.md - 添加 v1.6.0 功能说明和示例
+  - CHANGELOG.md - 详细记录所有变更
+
+### 📊 功能统计
+
+- **招式系统**
+  - 6 种招式分类全部支持
+  - 515 个官方招式验证
+  - 100% 官方格式兼容
+
+- **覆盖率提升**
+  - v1.5.1: 62% → v1.6.0: **75%** (+13%)
+
+---
+
 ## [v1.5.0] - 2025-10-25
 
 ### ✨ 新增功能
