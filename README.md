@@ -7,7 +7,7 @@
 
 🌿 从零开始创建的 Cobblemon 资源包生成器 - 基于 Model Context Protocol (MCP)
 
-**最新版本**: v1.6.0 - Move System Enhancement（招式系统完善）✅
+**最新版本**: v1.7.0 - Drop & Description System（掉落物与描述系统）✅
 
 ## ✨ 特性
 
@@ -29,6 +29,73 @@
 - [x] Phase 8: 性别与性格进化（v1.5.0）
 - [x] Phase 9: 生物群系与伤害进化（v1.5.1）
 - [x] Phase 10: 招式系统完善（v1.6.0）
+- [x] Phase 11: 掉落物与描述系统（v1.7.0）
+
+## 🎯 v1.7.0 新功能 - 掉落物与描述系统 ⭐
+
+### 掉落物配置系统
+v1.7.0 支持完整的宝可梦掉落物品配置：
+
+- ✅ **物品掉落** - 支持 Minecraft 和 Cobblemon 物品
+  ```python
+  drop_items=[
+      {"item": "minecraft:diamond", "percentage": 5.0},
+      {"item": "cobblemon:rare_candy", "percentage": 10.0}
+  ]
+  ```
+
+- ✅ **数量范围** - 灵活控制掉落数量
+  ```python
+  drop_items=[
+      {"item": "minecraft:coal", "quantityRange": "1-3"}
+  ]
+  ```
+
+- ✅ **掉落概率** - 百分比精确控制（0-100%）
+  ```python
+  drop_items=[
+      {"item": "cobblemon:exp_candy_xl", "percentage": 100.0},
+      {"item": "minecraft:emerald", "quantityRange": "1-3", "percentage": 5.0}
+  ]
+  ```
+
+### 描述与分类系统
+- ✅ **标签系统** - 世代、类型等标签
+  ```python
+  labels=["gen1", "legendary", "custom"]
+  ```
+
+- ✅ **蛋组系统** - 14种官方蛋组
+  ```python
+  egg_groups=["dragon", "monster"]
+  ```
+
+- ✅ **图鉴描述** - 自动翻译键生成
+  ```python
+  pokedex_key="cobblemon.species.mypokemon.desc"
+  ```
+
+### 完整示例
+```python
+create_pokemon_with_stats(
+    name="LegendaryDrop",
+    dex=10001,
+    primary_type="dragon",
+    
+    # v1.7.0: 掉落物与描述系统
+    drop_items=[
+        {"item": "cobblemon:exp_candy_xl", "percentage": 100.0},
+        {"item": "cobblemon:rare_candy", "percentage": 10.0},
+        {"item": "minecraft:emerald", "quantityRange": "1-3", "percentage": 5.0}
+    ],
+    drop_amount=2,
+    labels=["gen1", "legendary"],
+    egg_groups=["dragon", "undiscovered"],
+    pokedex_key="cobblemon.species.legendarydrop.desc"
+)
+```
+
+---
 
 ## 🎯 v1.6.0 新功能 - 招式系统完善 ⭐
 

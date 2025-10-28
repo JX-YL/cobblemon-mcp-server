@@ -4,6 +4,109 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v1.7.0] - 2025-10-28
+
+### ✨ 新增功能
+
+- **🎯 掉落物品配置系统**
+  - **物品掉落** - 支持 Minecraft 和 Cobblemon 物品
+    - 支持 `drop_items` 参数（列表格式）
+    - 支持 `drop_amount` 参数（掉落数量）
+    - 官方格式：`{"item": "minecraft:diamond", "percentage": 5.0}`
+  
+  - **数量范围** - 灵活控制掉落数量
+    - 支持 `quantityRange` 字段
+    - 格式：`"1-3"`, `"0-1"` 等
+  
+  - **掉落概率** - 百分比精确控制
+    - 支持 `percentage` 字段（0-100）
+    - 可与数量范围组合使用
+
+- **标签与分类系统**
+  - **标签系统** - 支持自定义标签
+    - 支持 `labels` 参数
+    - 常用标签：gen1-gen8, starter, legendary, mythical
+  
+  - **蛋组系统** - 14种官方蛋组
+    - 支持 `egg_groups` 参数
+    - 包括：monster, dragon, water1-3, bug, flying, field, fairy, grass, human_like, mineral, amorphous, undiscovered
+  
+  - **图鉴描述** - 自动翻译键生成
+    - 支持 `pokedex_key` 参数
+    - 默认格式：`cobblemon.species.{name}.desc`
+
+- **新增验证器**
+  - `DropValidator` - 验证掉落物配置
+    - 物品ID验证（Minecraft + Cobblemon）
+    - 数量范围验证（0-64）
+    - 掉落概率验证（0-100%）
+    - 蛋组验证
+  
+- **物品数据库**
+  - Minecraft 常用物品（30+）
+  - Cobblemon 物品（60+）
+    - 精灵球系列（25种）
+    - 进化石系列（10种）
+    - 经验糖果系列（5种）
+    - 树果系列（10+种）
+
+### 🔧 改进
+
+- **server.py 更新**
+  - 添加 5 个新参数：
+    - `drop_items` - 掉落物列表
+    - `drop_amount` - 掉落数量
+    - `labels` - 标签列表
+    - `egg_groups` - 蛋组列表
+    - `pokedex_key` - 图鉴翻译键
+  - 集成 DropValidator
+  - 完整的掉落物验证
+
+- **数据结构优化**
+  - 掉落物按官方格式自动生成
+  - 标签和蛋组自动填充默认值
+  - 图鉴翻译键自动生成
+
+### 🧪 测试
+
+- **渐进式测试策略**
+  - Step 1: 基础掉落物（SimpleDrop, RareDrop）
+  - Step 2: 数量范围（RangeDrop, MixedDrop）
+  - Step 3: Cobblemon物品（BallDrop, StoneDrop）
+  - Step 4: 完整配置（FullDrop）
+
+- **新增测试脚本**
+  - `docs/tests/generate_v1.7.0_tests.py` - 生成 v1.7.0 测试包
+  - `output/V1.7.0_TEST_GUIDE.md` - 完整测试指南
+  - `output/V1.7.0_QUICK_COMMANDS.md` - 快速测试指令
+
+- **游戏内验证**
+  - ✅ 所有掉落物正确配置
+  - ✅ 掉落概率符合预期
+  - ✅ 数量范围正确
+  - ✅ 标签和蛋组正确显示
+
+### 📚 文档
+
+- **新增设计文档**
+  - `docs/design/V1.7.0_DESIGN.md` - 掉落物系统设计文档
+
+- **更新主文档**
+  - README.md - 添加 v1.7.0 功能说明和示例
+  - CHANGELOG.md - 详细记录所有变更
+
+### 📊 功能统计
+
+- **掉落物系统**
+  - 支持所有 Minecraft 和 Cobblemon 物品
+  - 100% 官方格式兼容
+  - 完整的验证和错误提示
+
+- **覆盖率提升**
+  - v1.6.0: 75% → v1.7.0: **82%** (+7%)
+
+---
+
 ## [v1.6.0] - 2025-10-28
 
 ### ✨ 新增功能

@@ -149,7 +149,13 @@ async def create_pokemon_with_stats(
     tm_moves: list = None,           # ["flamethrower", "fireblast"]
     tutor_moves: list = None,        # ["blastburn", "heatwave"]
     legacy_moves: list = None,       # ["attract", "return"]
-    special_moves: list = None       # ["celebrate"]
+    special_moves: list = None,      # ["celebrate"]
+    # v1.7.0: 掉落物与描述系统
+    drop_items: list = None,         # [{"item": "minecraft:stone", "percentage": 5.0}]
+    drop_amount: int = 1,            # 掉落物品数量
+    labels: list = None,             # ["gen1", "starter"]
+    egg_groups: list = None,         # ["monster", "dragon"]
+    pokedex_key: str = None          # 图鉴翻译键（可选）
 ) -> dict:
     """创建宝可梦配置（v1.4.1 - 修复版，完整支持官方格式）
     
@@ -243,15 +249,15 @@ async def create_pokemon_with_stats(
         "weight": weight,  # 整数（百克）
         
         # 3. 图鉴和标签（必需）
-        "pokedex": [f"cobblemon.species.{name.lower()}.desc"],
-        "labels": ["custom"],
+        "pokedex": [pokedex_key] if pokedex_key else [f"cobblemon.species.{name.lower()}.desc"],
+        "labels": labels if labels else ["custom"],
         "aspects": [],
         
         # 4. 特性（必需）
         "abilities": abilities if abilities else ["synchronize"],
         
         # 5. 蛋组（必需）
-        "eggGroups": ["undiscovered"],
+        "eggGroups": egg_groups if egg_groups else ["undiscovered"],
         
         # 6. 能力值（必需）
         "baseStats": {
@@ -292,10 +298,67 @@ async def create_pokemon_with_stats(
         
         # 11. 掉落物（必需）
         "drops": {
-            "amount": 1,
+            "amount": drop_amount,
             "entries": []
         }
     })
+    
+    # v1.7.0: 处理掉落物
+    if drop_items:
+        from tools.validators.drop_validator import DropValidator
+        
+        drops_entries = []
+        for item_config in drop_items:
+            # 验证物品ID
+            item_id = item_config.get("item")
+            if not item_id:
+                return {
+                    "success": False,
+                    "error": "掉落物条目缺少 'item' 字段"
+                }
+            
+            is_valid, msg = DropValidator.validate_item_id(item_id)
+            if not is_valid:
+                return {
+                    "success": False,
+                    "error": f"掉落物验证失败: {msg}"
+                }
+            
+            entry = {"item": item_id}
+            
+            # 添加数量范围（可选）
+            if "quantityRange" in item_config:
+                is_valid, msg = DropValidator.validate_quantity_range(item_config["quantityRange"])
+                if not is_valid:
+                    return {
+                        "success": False,
+                        "error": f"数量范围验证失败: {msg}"
+                    }
+                entry["quantityRange"] = item_config["quantityRange"]
+            
+            # 添加掉落概率（可选）
+            if "percentage" in item_config:
+                is_valid, msg = DropValidator.validate_percentage(item_config["percentage"])
+                if not is_valid:
+                    return {
+                        "success": False,
+                        "error": f"掉落概率验证失败: {msg}"
+                    }
+                entry["percentage"] = item_config["percentage"]
+            
+            drops_entries.append(entry)
+        
+        species["drops"]["entries"] = drops_entries
+    
+    # v1.7.0: 验证蛋组
+    if egg_groups:
+        from tools.validators.drop_validator import DropValidator
+        is_valid, errors = DropValidator.validate_egg_groups(egg_groups)
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"蛋组验证失败: {errors}"
+            }
     
     # v1.6.0: 添加招式（支持分类）
     all_moves = []
