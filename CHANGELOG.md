@@ -4,6 +4,132 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v1.8.0] - 2025-10-29
+
+### ✨ 新增功能
+
+- **🌍 生成系统（Spawn System）**
+  - **生成池配置** - 完整的 `spawn_pool_world` 文件生成
+    - 支持 `spawns` 参数（列表格式）
+    - 支持 `spawn_enabled` 参数（启用/禁用）
+    - 官方格式 100% 兼容
+  
+  - **生成上下文** - 4种生成环境
+    - `grounded` - 地面生成
+    - `surface` - 水面生成
+    - `submerged` - 水下生成
+    - `seafloor` - 海底生成
+  
+  - **稀有度等级** - 4个稀有度
+    - `common` - 常见
+    - `uncommon` - 不常见
+    - `rare` - 稀有
+    - `ultra-rare` - 超稀有
+  
+  - **生成条件** - 丰富的条件系统
+    - 光照条件：`minSkyLight`, `maxSkyLight`, `minBlockLight`, `maxBlockLight`
+    - 生物群系：支持标签和具体群系（28+种常见标签）
+    - 天气条件：`isRaining`, `isThundering`
+    - 时间范围：`timeRange` (day, night, dawn, dusk)
+    - Y坐标：`minY`, `maxY` (-64 to 320)
+    - 其他：`canSeeSky`, `isSlimeChunk`
+  
+  - **反条件** - 排除特定条件
+    - `anticondition` 字段
+    - 支持所有 condition 字段
+  
+  - **动态权重** - 条件权重乘数
+    - `weightMultiplier` 字段
+    - 基于条件自动调整生成概率
+    - 示例：打雷时权重 x5
+  
+  - **多条目配置** - 一个宝可梦多个生成配置
+    - 支持不同环境的独立配置
+    - 每个条目独立的ID、条件、权重
+
+- **新增验证器**
+  - `SpawnValidator` - 生成配置验证
+    - 上下文验证（context）
+    - 稀有度验证（bucket）
+    - 等级范围验证（level）
+    - 权重验证（weight）
+    - 条件验证（condition）
+    - 反条件验证（anticondition）
+    - 权重乘数验证（weightMultiplier）
+    - 光照等级验证（0-15）
+    - Y坐标验证（-64 to 320）
+    - 时间范围验证
+    - 生物群系验证
+  
+  - `BiomeValidator` - 生物群系验证（扩展）
+    - 28+ 种常见生物群系标签
+    - 生物群系标签格式验证
+    - 建议功能（部分匹配）
+
+### 🔧 改进
+
+- **server.py 更新**
+  - 添加 2 个新参数：
+    - `spawns` - 生成配置列表
+    - `spawn_enabled` - 是否启用生成
+  - 集成 SpawnValidator
+  - 完整的生成配置构建
+  - 自动生成 `spawn_pool_world` 文件
+
+- **Packager 更新**
+  - 支持 `spawn_config` 参数
+  - 自动创建 `spawn_pool_world` 目录
+  - 生成正确的文件结构
+
+- **数据结构优化**
+  - 生成配置按官方格式自动生成
+  - 预设默认值自动填充
+  - 多条目自动处理
+
+### 🧪 测试
+
+- **渐进式测试策略**
+  - Step 1: 基础生成（SimpleSpawn, RareSpawn）
+  - Step 2: 天气时间（WeatherSpawn, NightSpawn）
+  - Step 3: 多条目（MultiSpawn）
+  - Step 4: 完整配置（FullSpawn）
+
+- **新增测试脚本**
+  - `docs/tests/generate_v1.8.0_tests.py` - 生成 v1.8.0 测试包
+  - `output/V1.8.0_TEST_GUIDE.md` - 完整测试指南
+  - `output/V1.8.0_QUICK_COMMANDS.md` - 快速测试指令
+
+- **测试覆盖**
+  - ✅ 6 个测试宝可梦
+  - ✅ 所有生成条件类型
+  - ✅ 多条目配置
+  - ✅ 权重乘数
+  - ✅ 反条件系统
+
+### 📚 文档
+
+- **新增设计文档**
+  - `docs/design/V1.8.0_DESIGN.md` - 生成系统设计文档
+
+- **更新主文档**
+  - README.md - 添加 v1.8.0 功能说明和示例
+  - CHANGELOG.md - 详细记录所有变更
+
+### 📊 功能统计
+
+- **生成系统**
+  - 4 种生成上下文
+  - 4 种稀有度等级
+  - 10+ 种生成条件类型
+  - 28+ 种生物群系标签
+  - 4 种时间范围
+  - 100% 官方格式兼容
+
+- **覆盖率提升**
+  - v1.7.0: 82% → v1.8.0: **88%** (+6%)
+
+---
+
 ## [v1.7.0] - 2025-10-28
 
 ### ✨ 新增功能

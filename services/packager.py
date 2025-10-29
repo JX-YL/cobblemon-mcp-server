@@ -13,7 +13,8 @@ class Packager:
         self,
         project_name: str,
         species_data: Dict[str, Any],
-        output_dir: str = "output"
+        output_dir: str = "output",
+        spawn_config: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """创建资源包
         
@@ -21,6 +22,7 @@ class Packager:
             project_name: 项目名称
             species_data: 宝可梦配置
             output_dir: 输出目录
+            spawn_config: 生成配置（v1.8.0）
         
         Returns:
             打包结果
@@ -40,6 +42,20 @@ class Packager:
         with open(species_file, 'w', encoding='utf-8') as f:
             json.dump(species_data, f, indent=2, ensure_ascii=False)
         
+        # v1.8.0: 创建 spawn_pool_world 文件（如果有生成配置）
+        files_created = [str(species_file.relative_to(base_dir)), "pack.mcmeta"]
+        
+        if spawn_config:
+            spawn_pool_dir = base_dir / "data" / "cobblemon" / "spawn_pool_world"
+            spawn_pool_dir.mkdir(parents=True, exist_ok=True)
+            
+            spawn_file = spawn_pool_dir / f"{species_name}.json"
+            
+            with open(spawn_file, 'w', encoding='utf-8') as f:
+                json.dump(spawn_config, f, indent=4, ensure_ascii=False)
+            
+            files_created.append(str(spawn_file.relative_to(base_dir)))
+        
         # 创建 pack.mcmeta
         pack_mcmeta = base_dir / "pack.mcmeta"
         mcmeta_data = {
@@ -56,10 +72,7 @@ class Packager:
             "success": True,
             "package_path": str(base_dir),
             "species_file": str(species_file),
-            "files_created": [
-                str(species_file.relative_to(base_dir)),
-                "pack.mcmeta"
-            ],
+            "files_created": files_created,
             "message": f"资源包已创建: {base_dir}"
         }
 

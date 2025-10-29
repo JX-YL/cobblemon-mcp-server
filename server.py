@@ -155,7 +155,10 @@ async def create_pokemon_with_stats(
     drop_amount: int = 1,            # 掉落物品数量
     labels: list = None,             # ["gen1", "starter"]
     egg_groups: list = None,         # ["monster", "dragon"]
-    pokedex_key: str = None          # 图鉴翻译键（可选）
+    pokedex_key: str = None,         # 图鉴翻译键（可选）
+    # v1.8.0: 生成系统
+    spawns: list = None,             # 生成配置列表
+    spawn_enabled: bool = True       # 是否启用生成
 ) -> dict:
     """创建宝可梦配置（v1.4.1 - 修复版，完整支持官方格式）
     
@@ -508,10 +511,59 @@ async def create_pokemon_with_stats(
     if not is_valid:
         return {"success": False, "errors": errors}
     
+    # v1.8.0: 处理生成配置
+    spawn_config = None
+    if spawns:
+        from tools.validators.spawn_validator import SpawnValidator
+        
+        # 验证生成配置
+        is_valid, errors = SpawnValidator.validate_spawns(spawns, name)
+        if not is_valid:
+            return {
+                "success": False,
+                "error": f"生成配置验证失败:\n{errors}"
+            }
+        
+        # 构建生成配置
+        spawn_entries = []
+        for spawn in spawns:
+            entry = {
+                "id": spawn["id"],
+                "pokemon": name.lower(),
+                "presets": spawn.get("presets", ["natural"]),
+                "type": "pokemon",
+                "context": spawn["context"],
+                "bucket": spawn["bucket"],
+                "level": spawn["level"],
+                "weight": spawn["weight"]
+            }
+            
+            # 添加条件
+            if "condition" in spawn:
+                entry["condition"] = spawn["condition"]
+            
+            # 添加反条件
+            if "anticondition" in spawn:
+                entry["anticondition"] = spawn["anticondition"]
+            
+            # 添加权重乘数
+            if "weightMultiplier" in spawn:
+                entry["weightMultiplier"] = spawn["weightMultiplier"]
+            
+            spawn_entries.append(entry)
+        
+        # 构建完整的生成池配置
+        spawn_config = {
+            "enabled": spawn_enabled,
+            "neededInstalledMods": [],
+            "neededUninstalledMods": [],
+            "spawns": spawn_entries
+        }
+    
     # 计算总能力值
     total_stats = sum([hp, attack, defence, special_attack, special_defence, speed])
     
-    return {
+    result = {
         "success": True,
         "species": species,
         "stats_summary": {
@@ -520,6 +572,12 @@ async def create_pokemon_with_stats(
         },
         "validation": "[OK] 格式验证通过"
     }
+    
+    # 如果有生成配置，添加到结果中
+    if spawn_config:
+        result["spawn_config"] = spawn_config
+    
+    return result
 
 
 @mcp.tool()
@@ -623,7 +681,25 @@ async def create_complete_package(
     evolution_item: str = None,
     evolution_friendship: int = None,
     evolution_time_range: str = None,
-    evolution_move_type: str = None
+    evolution_move_type: str = None,
+    # v1.5.0-v1.8.0 新增
+    evolution_gender: str = None,
+    evolution_nature: str = None,
+    evolution_biome: str = None,
+    evolution_damage_amount: int = None,
+    level_moves: dict = None,
+    egg_moves: list = None,
+    tm_moves: list = None,
+    tutor_moves: list = None,
+    legacy_moves: list = None,
+    special_moves: list = None,
+    drop_items: list = None,
+    drop_amount: int = 1,
+    labels: list = None,
+    egg_groups: list = None,
+    pokedex_key: str = None,
+    spawns: list = None,
+    spawn_enabled: bool = True
 ) -> dict:
     """一键生成完整资源包（v1.4.1 - 支持官方格式所有字段）
     
@@ -668,16 +744,25 @@ async def create_complete_package(
         ev_special_attack, ev_special_defence, ev_speed,
         moves, evolution_level, evolution_target,
         evolution_variant, evolution_item,
-        evolution_friendship, evolution_time_range, evolution_move_type
+        evolution_friendship, evolution_time_range, evolution_move_type,
+        evolution_gender, evolution_nature,
+        evolution_biome, evolution_damage_amount,
+        level_moves, egg_moves, tm_moves,
+        tutor_moves, legacy_moves, special_moves,
+        drop_items, drop_amount, labels,
+        egg_groups, pokedex_key,
+        spawns, spawn_enabled
     )
     
     if not result.get("success"):
         return result
     
     # 2. 打包
+    spawn_config = result.get("spawn_config", None)
     package_result = packager.create_package(
-        project_name=f"{name.lower()}_package",
-        species_data=result["species"]
+        project_name=name,
+        species_data=result["species"],
+        spawn_config=spawn_config
     )
     
     return {

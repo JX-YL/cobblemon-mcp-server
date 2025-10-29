@@ -7,7 +7,7 @@
 
 🌿 从零开始创建的 Cobblemon 资源包生成器 - 基于 Model Context Protocol (MCP)
 
-**最新版本**: v1.7.0 - Drop & Description System（掉落物与描述系统）✅
+**最新版本**: v1.8.0 - Spawn System（生成系统）✅
 
 ## ✨ 特性
 
@@ -30,6 +30,153 @@
 - [x] Phase 9: 生物群系与伤害进化（v1.5.1）
 - [x] Phase 10: 招式系统完善（v1.6.0）
 - [x] Phase 11: 掉落物与描述系统（v1.7.0）
+- [x] Phase 12: 生成系统（v1.8.0）
+
+## 🎯 v1.8.0 新功能 - 生成系统 ⭐
+
+### 完整的宝可梦生成配置
+v1.8.0 支持 Cobblemon 官方的完整生成系统（`spawn_pool_world`）：
+
+- ✅ **生成上下文** - 4种生成环境
+  ```python
+  spawns=[{
+      "context": "grounded",    # 地面
+      # "surface",              # 水面
+      # "submerged",            # 水下
+      # "seafloor",             # 海底
+  }]
+  ```
+
+- ✅ **稀有度控制** - 4个稀有度等级
+  ```python
+  spawns=[{
+      "bucket": "common",       # 常见
+      # "uncommon",             # 不常见
+      # "rare",                 # 稀有
+      # "ultra-rare",           # 超稀有
+  }]
+  ```
+
+- ✅ **等级范围** - 自定义生成等级
+  ```python
+  spawns=[{
+      "level": "5-30",          # 5-30级生成
+      "weight": 10.0            # 生成权重
+  }]
+  ```
+
+- ✅ **生成条件** - 丰富的条件系统
+  ```python
+  spawns=[{
+      "condition": {
+          # 光照条件
+          "minSkyLight": 8,
+          "maxSkyLight": 15,
+          
+          # 生物群系
+          "biomes": [
+              "#cobblemon:is_plains",
+              "#cobblemon:is_forest"
+          ],
+          
+          # 天气条件
+          "isRaining": False,
+          "isThundering": True,
+          
+          # 时间范围
+          "timeRange": "night",  # day, night, dawn, dusk
+          
+          # Y坐标限制
+          "minY": 60,
+          "maxY": 120,
+          
+          # 其他条件
+          "canSeeSky": True,
+          "isSlimeChunk": False
+      }
+  }]
+  ```
+
+- ✅ **反条件** - 排除特定条件
+  ```python
+  spawns=[{
+      "anticondition": {
+          "biomes": ["#cobblemon:is_ocean"]
+      }
+  }]
+  ```
+
+- ✅ **动态权重** - 条件权重乘数
+  ```python
+  spawns=[{
+      "weightMultiplier": {
+          "multiplier": 5.0,
+          "condition": {
+              "isThundering": True
+          }
+      }
+  }]
+  ```
+
+- ✅ **多条目配置** - 一个宝可梦多个生成配置
+  ```python
+  spawns=[
+      {
+          "id": "pokemon-1",
+          "context": "grounded",
+          "bucket": "common",
+          "level": "10-30",
+          "weight": 10.0,
+          "condition": {"biomes": ["#cobblemon:is_forest"]}
+      },
+      {
+          "id": "pokemon-2",
+          "context": "surface",
+          "bucket": "uncommon",
+          "level": "15-35",
+          "weight": 8.0,
+          "condition": {"biomes": ["#cobblemon:is_river"]}
+      }
+  ]
+  ```
+
+### 完整示例
+```python
+create_pokemon_with_stats(
+    name="LegendarySpawn",
+    dex=10001,
+    primary_type="dragon",
+    
+    # v1.8.0: 生成系统
+    spawns=[
+        {
+            "id": "legendaryspawn-1",
+            "context": "grounded",
+            "bucket": "ultra-rare",
+            "level": "50-70",
+            "weight": 3.0,
+            "weightMultiplier": {
+                "multiplier": 5.0,
+                "condition": {"isThundering": True}
+            },
+            "condition": {
+                "minSkyLight": 8,
+                "maxSkyLight": 15,
+                "biomes": ["#cobblemon:is_mountains"],
+                "timeRange": "day",
+                "minY": 100,
+                "maxY": 200
+            },
+            "anticondition": {
+                "biomes": ["#cobblemon:is_cold"]
+            }
+        }
+    ],
+    spawn_enabled=True
+)
+```
+
+---
 
 ## 🎯 v1.7.0 新功能 - 掉落物与描述系统 ⭐
 
