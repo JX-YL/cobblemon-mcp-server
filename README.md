@@ -5,403 +5,41 @@
 ![Python Version](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-🌿 从零开始创建的 Cobblemon 资源包生成器 - 基于 Model Context Protocol (MCP)
+🌿 **Professional Cobblemon Data Pack Generator** - Build custom Pokémon with ease!
 
-**最新版本**: v1.8.0 - Spawn System（生成系统）✅
-
-## ✨ 特性
-
-- 🎮 **宝可梦创建**: 创建自定义宝可梦配置
-- 📦 **资源包生成**: 一键生成完整的 Minecraft 数据包
-- ✅ **智能验证**: 自动验证命名规范和数据格式
-- 📚 **参考数据**: 内置官方 Cobblemon 数据参考
-- 🔧 **MCP 集成**: 直接在 Cursor IDE 中使用
-
-## 🚀 当前进度
-
-- [x] Phase 1: 最小可用版本
-- [x] Phase 2: 参考数据系统
-- [x] Phase 3: 验证系统
-- [x] Phase 4: 打包系统
-- [x] Phase 5: 功能增强
-- [x] Phase 6: 招式与进化系统
-- [x] Phase 7: 基础字段扩展（v1.4.1）
-- [x] Phase 8: 性别与性格进化（v1.5.0）
-- [x] Phase 9: 生物群系与伤害进化（v1.5.1）
-- [x] Phase 10: 招式系统完善（v1.6.0）
-- [x] Phase 11: 掉落物与描述系统（v1.7.0）
-- [x] Phase 12: 生成系统（v1.8.0）
-
-## 🎯 v1.8.0 新功能 - 生成系统 ⭐
-
-### 完整的宝可梦生成配置
-v1.8.0 支持 Cobblemon 官方的完整生成系统（`spawn_pool_world`）：
-
-- ✅ **生成上下文** - 4种生成环境
-  ```python
-  spawns=[{
-      "context": "grounded",    # 地面
-      # "surface",              # 水面
-      # "submerged",            # 水下
-      # "seafloor",             # 海底
-  }]
-  ```
-
-- ✅ **稀有度控制** - 4个稀有度等级
-  ```python
-  spawns=[{
-      "bucket": "common",       # 常见
-      # "uncommon",             # 不常见
-      # "rare",                 # 稀有
-      # "ultra-rare",           # 超稀有
-  }]
-  ```
-
-- ✅ **等级范围** - 自定义生成等级
-  ```python
-  spawns=[{
-      "level": "5-30",          # 5-30级生成
-      "weight": 10.0            # 生成权重
-  }]
-  ```
-
-- ✅ **生成条件** - 丰富的条件系统
-  ```python
-  spawns=[{
-      "condition": {
-          # 光照条件
-          "minSkyLight": 8,
-          "maxSkyLight": 15,
-          
-          # 生物群系
-          "biomes": [
-              "#cobblemon:is_plains",
-              "#cobblemon:is_forest"
-          ],
-          
-          # 天气条件
-          "isRaining": False,
-          "isThundering": True,
-          
-          # 时间范围
-          "timeRange": "night",  # day, night, dawn, dusk
-          
-          # Y坐标限制
-          "minY": 60,
-          "maxY": 120,
-          
-          # 其他条件
-          "canSeeSky": True,
-          "isSlimeChunk": False
-      }
-  }]
-  ```
-
-- ✅ **反条件** - 排除特定条件
-  ```python
-  spawns=[{
-      "anticondition": {
-          "biomes": ["#cobblemon:is_ocean"]
-      }
-  }]
-  ```
-
-- ✅ **动态权重** - 条件权重乘数
-  ```python
-  spawns=[{
-      "weightMultiplier": {
-          "multiplier": 5.0,
-          "condition": {
-              "isThundering": True
-          }
-      }
-  }]
-  ```
-
-- ✅ **多条目配置** - 一个宝可梦多个生成配置
-  ```python
-  spawns=[
-      {
-          "id": "pokemon-1",
-          "context": "grounded",
-          "bucket": "common",
-          "level": "10-30",
-          "weight": 10.0,
-          "condition": {"biomes": ["#cobblemon:is_forest"]}
-      },
-      {
-          "id": "pokemon-2",
-          "context": "surface",
-          "bucket": "uncommon",
-          "level": "15-35",
-          "weight": 8.0,
-          "condition": {"biomes": ["#cobblemon:is_river"]}
-      }
-  ]
-  ```
-
-### 完整示例
-```python
-create_pokemon_with_stats(
-    name="LegendarySpawn",
-    dex=10001,
-    primary_type="dragon",
-    
-    # v1.8.0: 生成系统
-    spawns=[
-        {
-            "id": "legendaryspawn-1",
-            "context": "grounded",
-            "bucket": "ultra-rare",
-            "level": "50-70",
-            "weight": 3.0,
-            "weightMultiplier": {
-                "multiplier": 5.0,
-                "condition": {"isThundering": True}
-            },
-            "condition": {
-                "minSkyLight": 8,
-                "maxSkyLight": 15,
-                "biomes": ["#cobblemon:is_mountains"],
-                "timeRange": "day",
-                "minY": 100,
-                "maxY": 200
-            },
-            "anticondition": {
-                "biomes": ["#cobblemon:is_cold"]
-            }
-        }
-    ],
-    spawn_enabled=True
-)
-```
+**Current Version**: v2.0.0 - Complete Feature Set ✨
 
 ---
 
-## 🎯 v1.7.0 新功能 - 掉落物与描述系统 ⭐
+## 🎯 What is Cobblemon MCP Server?
 
-### 掉落物配置系统
-v1.7.0 支持完整的宝可梦掉落物品配置：
+A powerful **Model Context Protocol (MCP)** tool that lets you create custom Pokémon for **Cobblemon** mod through natural language in **Cursor IDE**.
 
-- ✅ **物品掉落** - 支持 Minecraft 和 Cobblemon 物品
-  ```python
-  drop_items=[
-      {"item": "minecraft:diamond", "percentage": 5.0},
-      {"item": "cobblemon:rare_candy", "percentage": 10.0}
-  ]
-  ```
-
-- ✅ **数量范围** - 灵活控制掉落数量
-  ```python
-  drop_items=[
-      {"item": "minecraft:coal", "quantityRange": "1-3"}
-  ]
-  ```
-
-- ✅ **掉落概率** - 百分比精确控制（0-100%）
-  ```python
-  drop_items=[
-      {"item": "cobblemon:exp_candy_xl", "percentage": 100.0},
-      {"item": "minecraft:emerald", "quantityRange": "1-3", "percentage": 5.0}
-  ]
-  ```
-
-### 描述与分类系统
-- ✅ **标签系统** - 世代、类型等标签
-  ```python
-  labels=["gen1", "legendary", "custom"]
-  ```
-
-- ✅ **蛋组系统** - 14种官方蛋组
-  ```python
-  egg_groups=["dragon", "monster"]
-  ```
-
-- ✅ **图鉴描述** - 自动翻译键生成
-  ```python
-  pokedex_key="cobblemon.species.mypokemon.desc"
-  ```
-
-### 完整示例
-```python
-create_pokemon_with_stats(
-    name="LegendaryDrop",
-    dex=10001,
-    primary_type="dragon",
-    
-    # v1.7.0: 掉落物与描述系统
-    drop_items=[
-        {"item": "cobblemon:exp_candy_xl", "percentage": 100.0},
-        {"item": "cobblemon:rare_candy", "percentage": 10.0},
-        {"item": "minecraft:emerald", "quantityRange": "1-3", "percentage": 5.0}
-    ],
-    drop_amount=2,
-    labels=["gen1", "legendary"],
-    egg_groups=["dragon", "undiscovered"],
-    pokedex_key="cobblemon.species.legendarydrop.desc"
-)
-```
+### Key Features
+- 🎮 **Complete Pokémon Configuration** - All official fields supported
+- 📦 **One-Click Data Pack Generation** - Instant Minecraft-ready packages
+- ✅ **Smart Validation** - Auto-validates names, moves, types, and more
+- 🧬 **Advanced Evolution System** - 9 evolution mechanisms with complex conditions
+- 🎪 **Rich Move System** - 6 move categories with 515+ official moves
+- 🎁 **Drop & Spawn System** - Full control over items and spawning
+- 🔧 **MCP Integration** - Direct integration with Cursor IDE
 
 ---
 
-## 🎯 v1.6.0 新功能 - 招式系统完善 ⭐
-
-### 招式分类系统
-v1.6.0 完整支持官方 Cobblemon 的所有招式分类：
-
-- ✅ **等级招式（Level Moves）** - 升级自动学会
-  ```python
-  level_moves={
-      1: ["tackle", "growl"],
-      5: ["ember"],
-      10: ["flamethrower"]
-  }
-  ```
-
-- ✅ **蛋招式（Egg Moves）** - 遗传招式
-  ```python
-  egg_moves=["bellydrum", "dragontail", "metalclaw"]
-  ```
-
-- ✅ **TM招式（TM Moves）** - 技能机器招式
-  ```python
-  tm_moves=["flamethrower", "fireblast", "swordsdance"]
-  ```
-
-- ✅ **教学招式（Tutor Moves）** - 教学招式
-  ```python
-  tutor_moves=["blastburn", "heatwave", "firepunch"]
-  ```
-
-- ✅ **遗留招式（Legacy Moves）** - 旧版本招式
-  ```python
-  legacy_moves=["attract", "return", "toxic"]
-  ```
-
-- ✅ **特殊招式（Special Moves）** - 特殊事件招式
-  ```python
-  special_moves=["celebrate", "howl"]
-  ```
-
-### 招式验证系统
-- ✅ **515个官方招式** - 自动验证招式是否存在
-- ✅ **智能建议** - 拼写错误时提供相似招式建议
-- ✅ **自动排序** - 等级招式按等级自动排序
-- ✅ **格式化** - 自动转换为官方格式（`1:tackle`, `egg:bellydrum`）
-
-### 完整示例
-```python
-create_pokemon_with_stats(
-    name="Charmander",
-    dex=4,
-    primary_type="fire",
-    
-    # v1.6.0: 完整招式系统
-    level_moves={
-        1: ["scratch", "growl"],
-        4: ["ember"],
-        17: ["firefang"],
-        40: ["flareblitz"]
-    },
-    egg_moves=["bellydrum", "dragontail", "metalclaw"],
-    tm_moves=["flamethrower", "fireblast", "swordsdance"],
-    tutor_moves=["blastburn", "heatwave", "firepunch"],
-    legacy_moves=["attract", "return", "toxic"],
-    special_moves=["celebrate"]
-)
-```
-
----
-
-## 🎯 v1.5.0 新功能 - 性别与性格进化
-
-### Properties 进化条件 ⭐
-- ✅ **性别进化（Gender Evolution）** - 指定性别才能进化
-  - 支持 `gender=male`, `gender=female`, `gender=genderless`
-  - 示例：雌性 Venomtail 33级进化成 Toxempress
-  
-- ✅ **性格进化（Nature Evolution）** - 指定性格才能进化
-  - 支持所有 25 种官方性格（hardy, adamant, modest 等）
-  - 示例：Hardy 性格的 Voltbaby 30级进化成 Ampedrocker
-
-### 进化配置示例
-```python
-# 性别进化
-evolution_target="toxempress",
-evolution_level=33,
-evolution_gender="female"  # 只有雌性才能进化
-
-# 性格进化
-evolution_target="ampedrocker",
-evolution_level=30,
-evolution_nature="hardy"  # 只有 Hardy 性格才能进化
-```
-
----
-
-## 🎯 v1.4.1 功能 - 官方格式支持
-
-### 双属性 & 自定义特性
-- ✅ **secondaryType** - 双属性宝可梦（如 Toxel: electric/poison）
-- ✅ **abilities** - 自定义特性（1-3个，支持隐藏特性 `h:ability`）
-
-### 性别、捕获与繁殖
-- ✅ **maleRatio** - 性别比例（-1=无性别，0.0=100%雌，0.875=御三家，1.0=100%雄）
-- ✅ **catchRate** - 捕获率（3=传说，45=普通，255=极易）
-- ✅ **baseFriendship** - 初始亲密度（0-255）
-- ✅ **eggCycles** - 孵蛋周期（1-120）
-
-### 努力值与体型
-- ✅ **evYield** - 努力值产出（总和≤3，如 HP+3）
-- ✅ **height** - 身高（整数，单位：分米）
-- ✅ **weight** - 体重（整数，单位：百克）
-- ✅ **baseScale** - 缩放比例
-
-### ⚠️ 重要：单位说明
-```python
-height=7,   # 7分米 = 0.7米
-weight=69,  # 69百克 = 6.9千克
-```
-
----
-
-## 🧬 支持的进化机制
-
-### 进化类型（v1.3.0）
-- ✅ **等级进化（level_up）** - 达到指定等级进化
-- ✅ **道具进化（item_interact）** - 使用进化石等道具
-- ✅ **交换进化（trade）** - 通信交换进化
-
-### 进化条件
-- ✅ **等级条件** - 指定最低等级
-- ✅ **亲密度条件** - 指定最低亲密度（0-255）
-- ✅ **时间条件** - 白天/夜晚/黄昏/黎明
-- ✅ **招式类型条件** - 掌握特定属性的招式
-- ✅ **性别条件（v1.5.0）** - 指定性别才能进化 ⭐
-- ✅ **性格条件（v1.5.0）** - 指定性格才能进化 ⭐
-
-## 📦 安装
+## 📦 Installation
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/JX-YL/cobblemon-mcp-server.git
 cd cobblemon-mcp-server
 
-# 安装依赖
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## 🎯 快速启动
+### MCP Configuration in Cursor
 
-### 1. 直接运行服务器
-
-```bash
-python server.py
-```
-
-### 2. 在 Cursor 中配置 MCP
-
-编辑 `~/.cursor/mcp.json`:
+Edit `~/.cursor/mcp.json` (or `%APPDATA%\Cursor\User\mcp.json` on Windows):
 
 ```json
 {
@@ -409,41 +47,801 @@ python server.py
     "cobblemon": {
       "command": "python",
       "args": [
-        "path/to/cobblemon-mcp-server/server.py"
+        "E:/AI Super Personal Studio/Workspace/Cobblemon/Cobblemon_mcp_server/server.py"
       ]
     }
   }
 }
 ```
 
-### 3. 使用 MCP Tools
+Restart Cursor, and you're ready to go! 🚀
 
-重启 Cursor 后，直接使用自然语言：
-- "创建一个草系宝可梦"
-- "查看 Bulbasaur 的官方配置"
-- "生成一个火系宝可梦的完整资源包"
+---
 
-## 🛠️ 可用 MCP Tools
+## 🚀 Quick Start
 
-| Tool | 描述 |
-|------|------|
-| `create_pokemon` | 创建基础宝可梦配置 |
-| `create_pokemon_with_stats` | 创建带自定义能力值的宝可梦 |
-| `create_complete_package` | 一键生成完整资源包 |
-| `get_official_reference` | 查询官方参考数据 |
-| `save_pokemon` | 保存宝可梦配置到文件 |
+### Basic Usage
 
-## 📖 文档
+After configuring MCP, simply chat with Cursor:
 
-- [从零开始教程](../../../Plan/01-Cobblemon-MCP/Cobblemon-MCP-从零开始.md)
-- [完整方案文档](../../../Plan/01-Cobblemon-MCP/Cobblemon-MCP-完整方案.md)
-- [执行计划](../../../Plan/01-Cobblemon-MCP/Cobblemon-MCP-执行计划.md)
+```
+You: "Create a fire-type Pokémon called Flameon"
+```
 
-## 🤝 贡献
+Cursor will automatically call the MCP tool to generate:
+- ✅ Species JSON file
+- ✅ Complete data pack structure
+- ✅ Validated configuration
 
-欢迎提交 Issue 和 Pull Request！
+### Example: Complete Pokémon
 
-## 📝 许可证
+```python
+create_complete_package(
+    name="Flameon",
+    dex=10001,
+    primary_type="fire",
+    secondary_type="flying",
+    
+    # Base Stats (v1.4.1)
+    hp=78,
+    attack=84,
+    defence=78,
+    special_attack=109,
+    special_defence=85,
+    speed=100,
+    
+    # Physical Attributes
+    height=15,  # 1.5m
+    weight=320,  # 32.0kg
+    male_ratio=0.875,  # 87.5% male (starter ratio)
+    
+    # Abilities
+    abilities=["blaze", "h:solarpower"],
+    
+    # Moves (v1.6.0)
+    level_moves={
+        1: ["scratch", "ember"],
+        7: ["smokescreen"],
+        13: ["dragonbreath"],
+        20: ["flamethrower"],
+        36: ["airslash"],
+        50: ["flareblitz"]
+    },
+    egg_moves=["bellydrum", "dragontail"],
+    tm_moves=["fireblast", "swordsdance", "aerialace"],
+    
+    # Evolution (v1.5.1)
+    evolution_target="megaflameon",
+    evolution_level=40,
+    evolution_biome="#cobblemon:is_volcanic",
+    
+    # Drops (v1.7.0)
+    drop_items=[
+        {"item": "cobblemon:exp_candy_l", "percentage": 100.0},
+        {"item": "minecraft:blaze_powder", "quantityRange": "1-3", "percentage": 50.0}
+    ],
+    drop_amount=2,
+    
+    # Spawns (v1.8.0)
+    spawns=[
+        {
+            "id": "flameon-1",
+            "context": "grounded",
+            "bucket": "uncommon",
+            "level": "20-35",
+            "weight": 8.0,
+            "condition": {
+                "biomes": ["#cobblemon:is_volcanic", "#cobblemon:is_mountains"],
+                "minSkyLight": 10,
+                "timeRange": "day"
+            }
+        }
+    ],
+    spawn_enabled=True,
+    
+    # Description
+    labels=["custom", "legendary"],
+    egg_groups=["dragon", "flying"],
+    pokedex_key="cobblemon.species.flameon.desc"
+)
+```
 
-MIT License
+This generates a complete, game-ready data pack! 🎉
 
+---
+
+## 📚 Complete Feature Guide
+
+### 1️⃣ Basic Pokémon Info (v1.0.0)
+
+```python
+create_pokemon_with_stats(
+    name="MyPokemon",       # Name (lowercase, letters only)
+    dex=10001,              # Pokédex number (1-9999)
+    primary_type="fire",    # Primary type
+    secondary_type="water"  # Secondary type (optional)
+)
+```
+
+**18 Available Types:**
+`normal`, `fire`, `water`, `electric`, `grass`, `ice`, `fighting`, `poison`, `ground`, `flying`, `psychic`, `bug`, `rock`, `ghost`, `dragon`, `dark`, `steel`, `fairy`
+
+---
+
+### 2️⃣ Base Stats & Attributes (v1.4.1)
+
+#### **Base Stats**
+```python
+hp=100,
+attack=100,
+defence=100,
+special_attack=100,
+special_defence=100,
+speed=100
+```
+
+#### **Physical Attributes**
+```python
+height=10,        # Height in decimeters (10 = 1.0m)
+weight=100,       # Weight in hectograms (100 = 10.0kg)
+base_scale=1.0    # Model scale multiplier
+```
+
+#### **Gender & Breeding**
+```python
+male_ratio=0.5,       # Gender ratio (-1=genderless, 0.0=100% female, 1.0=100% male)
+egg_cycles=20,        # Egg hatch cycles (1-120)
+egg_groups=["water_1", "monster"]  # Egg groups
+```
+
+**14 Egg Groups:**
+`monster`, `water_1`, `water_2`, `water_3`, `bug`, `flying`, `field`, `fairy`, `grass`, `human_like`, `mineral`, `amorphous`, `dragon`, `ditto`, `undiscovered`
+
+#### **Catch & Experience**
+```python
+catch_rate=45,           # Catch rate (3=legendary, 45=normal, 255=easy)
+base_friendship=50,      # Base friendship (0-255)
+base_experience_yield=100  # Base EXP yield
+```
+
+#### **EV Yield**
+```python
+ev_hp=2,                 # HP EV yield
+ev_attack=0,
+ev_defence=0,
+ev_special_attack=1,
+ev_special_defence=0,
+ev_speed=0
+# Total EVs should not exceed 3
+```
+
+---
+
+### 3️⃣ Abilities (v1.4.1)
+
+```python
+abilities=[
+    "blaze",           # Regular ability 1
+    "torrent",         # Regular ability 2
+    "h:solarpower"     # Hidden ability (prefix with "h:")
+]
+```
+
+- 1-3 abilities supported
+- Hidden abilities use `h:` prefix
+- Use lowercase, no underscores (e.g., `waterabsorb` not `water_absorb`)
+
+---
+
+### 4️⃣ Move System (v1.6.0) ⭐
+
+#### **Level Moves**
+Moves learned by leveling up:
+```python
+level_moves={
+    1: ["tackle", "growl"],      # Starts with these
+    5: ["ember"],                # Learns at level 5
+    10: ["flamethrower"],        # Learns at level 10
+    40: ["flareblitz"]
+}
+```
+
+#### **Egg Moves**
+Inherited from parents:
+```python
+egg_moves=["bellydrum", "dragontail", "metalclaw"]
+```
+
+#### **TM Moves**
+Technical Machine moves:
+```python
+tm_moves=["flamethrower", "fireblast", "swordsdance"]
+```
+
+#### **Tutor Moves**
+Move Tutor exclusive:
+```python
+tutor_moves=["blastburn", "heatwave", "firepunch"]
+```
+
+#### **Legacy Moves**
+Old generation moves:
+```python
+legacy_moves=["attract", "return", "toxic"]
+```
+
+#### **Special Moves**
+Event-exclusive moves:
+```python
+special_moves=["celebrate", "howl"]
+```
+
+#### **Move Validation**
+- ✅ 515+ official Cobblemon moves pre-loaded
+- ✅ Auto-suggests similar moves for typos
+- ✅ Format validation (lowercase, no special chars)
+
+---
+
+### 5️⃣ Evolution System (v1.3.0 - v1.5.1) 🧬
+
+#### **Basic Evolution Types**
+
+**Level Up Evolution:**
+```python
+evolution_variant="level_up",
+evolution_target="charizard",
+evolution_level=36
+```
+
+**Item Interaction Evolution:**
+```python
+evolution_variant="item_interact",
+evolution_target="raichu",
+evolution_item="minecraft:thunder_stone"
+```
+
+**Trade Evolution:**
+```python
+evolution_variant="trade",
+evolution_target="gengar"
+```
+
+**Friendship Evolution:**
+```python
+evolution_variant="friendship",
+evolution_target="espeon",
+evolution_friendship=220  # Min friendship
+```
+
+#### **Evolution Conditions (v1.5.0-v1.5.1)**
+
+**Time Range:**
+```python
+evolution_time_range="day"  # Options: day, night, dawn, dusk
+```
+
+**Has Move Type:**
+```python
+evolution_move_type="fairy"  # Requires a fairy-type move
+```
+
+**Gender (v1.5.0):**
+```python
+evolution_gender="female"  # Options: male, female, genderless
+```
+
+**Nature (v1.5.0):**
+```python
+evolution_nature="adamant"  # Any of the 25 official natures
+```
+
+**Biome (v1.5.1):**
+```python
+evolution_biome="#cobblemon:is_beach"  # Biome tag
+```
+
+**Damage Taken (v1.5.1):**
+```python
+evolution_variant="damage_taken",
+evolution_damage_amount=50  # Must take 50+ damage without fainting
+```
+
+#### **Complex Evolution Example:**
+```python
+# Female-only, beach biome, daytime evolution
+evolution_variant="level_up",
+evolution_target="beachqueen",
+evolution_level=30,
+evolution_gender="female",
+evolution_biome="#minecraft:is_beach",
+evolution_time_range="day"
+```
+
+---
+
+### 6️⃣ Drop System (v1.7.0) 🎁
+
+#### **Basic Drop Configuration**
+```python
+drop_items=[
+    {"item": "minecraft:diamond", "percentage": 5.0},
+    {"item": "cobblemon:rare_candy", "percentage": 10.0}
+],
+drop_amount=1  # Number of items to drop
+```
+
+#### **Quantity Ranges**
+```python
+drop_items=[
+    {"item": "minecraft:coal", "quantityRange": "1-3"}  # Drops 1-3 coal
+]
+```
+
+#### **Mixed Configuration**
+```python
+drop_items=[
+    {
+        "item": "cobblemon:exp_candy_xl",
+        "percentage": 100.0  # Always drops
+    },
+    {
+        "item": "minecraft:emerald",
+        "quantityRange": "1-3",
+        "percentage": 5.0  # 5% chance to drop 1-3 emeralds
+    }
+]
+```
+
+#### **Supported Items**
+- ✅ All Minecraft items (`minecraft:*`)
+- ✅ All Cobblemon items (`cobblemon:*`)
+- ✅ Auto-validation for item IDs
+
+---
+
+### 7️⃣ Spawn System (v1.8.0) 🌍
+
+#### **Basic Spawn Configuration**
+```python
+spawns=[
+    {
+        "id": "pokemon-1",
+        "context": "grounded",      # Where it spawns
+        "bucket": "common",         # How rare
+        "level": "10-30",           # Level range
+        "weight": 10.0              # Spawn weight
+    }
+]
+```
+
+#### **Context Types (Where)**
+- `grounded` - On land
+- `surface` - On water surface
+- `submerged` - Underwater
+- `seafloor` - Ocean floor
+
+#### **Bucket Types (Rarity)**
+- `common` - Common spawns
+- `uncommon` - Less common
+- `rare` - Rare spawns
+- `ultra-rare` - Extremely rare
+
+#### **Spawn Conditions**
+```python
+spawns=[{
+    "condition": {
+        # Light
+        "minSkyLight": 8,
+        "maxSkyLight": 15,
+        
+        # Biomes
+        "biomes": [
+            "#cobblemon:is_plains",
+            "#cobblemon:is_forest"
+        ],
+        
+        # Weather
+        "isRaining": False,
+        "isThundering": True,
+        
+        # Time
+        "timeRange": "night",  # day, night, dawn, dusk
+        
+        # Position
+        "minY": 60,
+        "maxY": 120,
+        "canSeeSky": True,
+        
+        # Special
+        "isSlimeChunk": False
+    }
+}]
+```
+
+#### **Anti-Conditions (Exclusions)**
+```python
+spawns=[{
+    "anticondition": {
+        "biomes": ["#cobblemon:is_ocean"]  # Never spawn in oceans
+    }
+}]
+```
+
+#### **Weight Multipliers (Dynamic Rarity)**
+```python
+spawns=[{
+    "weightMultiplier": {
+        "multiplier": 5.0,  # 5x more common during thunderstorms
+        "condition": {
+            "isThundering": True
+        }
+    }
+}]
+```
+
+#### **Multiple Spawn Entries**
+One Pokémon can have multiple spawn configurations:
+```python
+spawns=[
+    {
+        "id": "pokemon-1",
+        "context": "grounded",
+        "bucket": "common",
+        "level": "10-30",
+        "condition": {"biomes": ["#cobblemon:is_forest"]}
+    },
+    {
+        "id": "pokemon-2",
+        "context": "surface",
+        "bucket": "rare",
+        "level": "30-50",
+        "condition": {"biomes": ["#cobblemon:is_river"]}
+    }
+]
+```
+
+#### **Common Biome Tags**
+- `#cobblemon:is_plains`
+- `#cobblemon:is_forest`
+- `#cobblemon:is_mountains`
+- `#cobblemon:is_volcanic`
+- `#cobblemon:is_beach`
+- `#cobblemon:is_ocean`
+- `#cobblemon:is_cold`
+- `#cobblemon:is_jungle`
+- `#cobblemon:is_desert`
+- `#minecraft:is_*` (Minecraft tags)
+
+---
+
+### 8️⃣ Description & Labels (v1.7.0)
+
+```python
+# Labels for categorization
+labels=["gen1", "legendary", "custom"],
+
+# Pokédex description key
+pokedex_key="cobblemon.species.mypokemon.desc",
+
+# Egg groups (breeding compatibility)
+egg_groups=["dragon", "monster"]
+```
+
+---
+
+## 🛠️ Available MCP Tools
+
+| Tool | Description | Use Case |
+|------|-------------|----------|
+| `create_pokemon` | Basic Pokémon config | Quick prototyping |
+| `create_pokemon_with_stats` | Full custom config | Complete Pokémon |
+| `create_complete_package` | Generate data pack | One-click package |
+| `get_official_reference` | Query official data | Reference lookup |
+| `save_pokemon` | Save to file | Manual editing |
+
+---
+
+## 📖 Examples
+
+### Example 1: Starter Pokémon
+```python
+create_complete_package(
+    name="Grasstar",
+    dex=10001,
+    primary_type="grass",
+    
+    # Starter stats (total: 318)
+    hp=45,
+    attack=49,
+    defence=49,
+    special_attack=65,
+    special_defence=65,
+    speed=45,
+    
+    # Starter gender ratio
+    male_ratio=0.875,  # 87.5% male, 12.5% female
+    
+    # Abilities
+    abilities=["overgrow", "h:chlorophyll"],
+    
+    # Starter moveset
+    level_moves={
+        1: ["tackle", "growl"],
+        7: ["vinewhip"],
+        13: ["razorleaf"],
+        20: ["solarbeam"]
+    },
+    
+    # Evolves at 16
+    evolution_target="grasstree",
+    evolution_level=16,
+    
+    # Common spawn in forests
+    spawns=[{
+        "id": "grasstar-1",
+        "context": "grounded",
+        "bucket": "rare",  # Starters are rare!
+        "level": "5-10",
+        "weight": 3.0,
+        "condition": {"biomes": ["#cobblemon:is_forest"]}
+    }]
+)
+```
+
+### Example 2: Legendary Pokémon
+```python
+create_complete_package(
+    name="Skyking",
+    dex=10002,
+    primary_type="dragon",
+    secondary_type="flying",
+    
+    # Legendary stats (total: 680)
+    hp=106,
+    attack=130,
+    defence=90,
+    special_attack=130,
+    special_defence=90,
+    speed=134,
+    
+    # Legendary properties
+    male_ratio=-1,  # Genderless
+    catch_rate=3,   # Very hard to catch
+    base_friendship=0,
+    ev_special_attack=3,  # Max EV yield
+    
+    # Legendary ability
+    abilities=["pressure", "h:multiscale"],
+    
+    # Powerful moveset
+    level_moves={
+        1: ["dragonrage", "twister"],
+        10: ["dragonbreath"],
+        30: ["dragonclaw"],
+        50: ["outrage"],
+        70: ["dracometeor"]
+    },
+    tm_moves=["fireblast", "thunder", "blizzard", "hyperbeam"],
+    
+    # No evolution
+    
+    # Legendary drops
+    drop_items=[
+        {"item": "cobblemon:exp_candy_xl", "percentage": 100.0},
+        {"item": "minecraft:dragon_breath", "quantityRange": "3-5", "percentage": 50.0}
+    ],
+    drop_amount=2,
+    
+    # Ultra-rare spawn in mountains during thunderstorms
+    spawns=[{
+        "id": "skyking-1",
+        "context": "grounded",
+        "bucket": "ultra-rare",
+        "level": "70-80",
+        "weight": 1.0,
+        "weightMultiplier": {
+            "multiplier": 10.0,
+            "condition": {"isThundering": True}
+        },
+        "condition": {
+            "biomes": ["#cobblemon:is_mountains"],
+            "minY": 120,
+            "timeRange": "night"
+        }
+    }],
+    
+    labels=["custom", "legendary"],
+    egg_groups=["undiscovered"]
+)
+```
+
+### Example 3: Regional Form
+```python
+create_complete_package(
+    name="SandshewAlola",
+    dex=10003,
+    primary_type="ice",
+    secondary_type="steel",
+    
+    # Alolan Sandshew stats
+    hp=50,
+    attack=75,
+    defence=90,
+    special_attack=10,
+    special_defence=35,
+    speed=40,
+    
+    abilities=["snowcloak", "h:slushrush"],
+    
+    level_moves={
+        1: ["scratch", "defensecurl"],
+        5: ["powdersnow"],
+        10: ["iceball"],
+        15: ["metalclaw"],
+        20: ["iciclespear"]
+    },
+    
+    # Evolves with Ice Stone
+    evolution_variant="item_interact",
+    evolution_target="sandslashalola",
+    evolution_item="minecraft:ice",
+    
+    # Spawns in cold biomes
+    spawns=[{
+        "id": "sandshewalola-1",
+        "context": "grounded",
+        "bucket": "uncommon",
+        "level": "10-25",
+        "weight": 8.0,
+        "condition": {
+            "biomes": ["#cobblemon:is_cold"],
+            "maxSkyLight": 7  # Prefers caves
+        }
+    }],
+    
+    labels=["alola", "regional"]
+)
+```
+
+---
+
+## 📂 Output Structure
+
+Generated data packs follow official Cobblemon format:
+
+```
+MyPokemon/
+├── pack.mcmeta
+├── data/
+│   └── cobblemon/
+│       ├── species/
+│       │   └── mypokemon.json          # Pokémon configuration
+│       └── spawn_pool_world/
+│           └── mypokemon.json          # Spawn configuration
+```
+
+### Testing Your Data Pack
+
+1. **Copy to Minecraft**:
+   ```
+   .minecraft/saves/YourWorld/datapacks/MyPokemon/
+   ```
+
+2. **Reload in-game**:
+   ```
+   /reload
+   ```
+
+3. **Spawn your Pokémon**:
+   ```
+   /pokespawn MyPokemon
+   ```
+
+4. **Check moves** (in-game):
+   ```
+   /pokeedit 1
+   Click "Moves" tab to verify
+   ```
+
+---
+
+## 🔧 Development
+
+### Project Structure
+```
+cobblemon-mcp-server/
+├── server.py                  # Main MCP server
+├── services/
+│   └── packager.py           # Data pack generation
+├── tools/
+│   └── validators/
+│       ├── name_validator.py
+│       ├── format_validator.py
+│       ├── evolution_validator.py
+│       ├── move_validator.py
+│       ├── drop_validator.py
+│       └── spawn_validator.py
+├── data/
+│   └── official_moves.json   # 515+ official moves
+├── docs/
+│   ├── design/               # Design documents
+│   ├── tests/                # Test scripts
+│   └── analysis/             # Progress reports
+├── output/                   # Generated packages
+└── requirements.txt
+```
+
+### Running Tests
+
+Generate test packages:
+```bash
+python docs/tests/generate_v1.8.0_tests.py
+```
+
+---
+
+## 🚧 Roadmap
+
+### ✅ Completed (v1.0.0 - v2.0.0)
+- [x] Basic Pokémon creation
+- [x] Official format support (v1.4.1)
+- [x] Gender & nature evolution (v1.5.0)
+- [x] Biome & damage evolution (v1.5.1)
+- [x] Complete move system (v1.6.0)
+- [x] Drop & description system (v1.7.0)
+- [x] Complete spawn system (v1.8.0)
+- [x] Comprehensive documentation (v2.0.0)
+
+### 🔮 Future Considerations
+- [ ] Forms & Aspects system (requires resource pack support)
+- [ ] GUI generator (web interface)
+- [ ] Batch import/export
+- [ ] Visual stat calculator
+
+**Note**: Mega Evolution, Gigantamax, and Primal Reversion require mod-level code (like MegaShowdown addon) and cannot be implemented through data packs alone.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a Pull Request
+
+### Reporting Issues
+
+Found a bug? Have a suggestion? [Open an issue](https://github.com/JX-YL/cobblemon-mcp-server/issues)!
+
+---
+
+## 📝 License
+
+MIT License - See [LICENSE](LICENSE) for details
+
+---
+
+## 🙏 Acknowledgments
+
+- **Cobblemon Team** - For the amazing mod
+- **Model Context Protocol** - For the powerful integration framework
+- **Cursor Team** - For the incredible IDE
+
+---
+
+## 📞 Contact
+
+- **GitHub**: [@JX-YL](https://github.com/JX-YL)
+- **Project**: [cobblemon-mcp-server](https://github.com/JX-YL/cobblemon-mcp-server)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the Cobblemon community**
+
+[⭐ Star us on GitHub](https://github.com/JX-YL/cobblemon-mcp-server) | [📖 Documentation](docs/) | [🐛 Report Bug](https://github.com/JX-YL/cobblemon-mcp-server/issues)
+
+</div>
